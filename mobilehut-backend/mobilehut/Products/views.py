@@ -206,7 +206,7 @@ class ManageProduct(APIView):
         else:
             serializer = ProductSerializer(pro)
             colour=Colour.objects.filter(colour_product=pro.id).values()
-            #print("colour is ===>",colour)
+            
             select_colour={}
             append_color=[]
             for x in range(0,len(colour)):
@@ -215,9 +215,8 @@ class ManageProduct(APIView):
                 append_color.append(select_colour)
                 select_colour={}
                 
-            print(append_color)
             product_data=serializer.data
-            product_data['colour']=append_color
+            product_data['product_colors']=append_color
             
             
             return Response(product_data, status=status.HTTP_200_OK)
@@ -231,6 +230,34 @@ class ManageProduct(APIView):
         else:
             payload = request.data
             serializer = ProductSerializer(pro,data=payload)
+            
+            clr=Colour.objects.filter(colour_product=pro.id).values()
+            # first delete all colours of existing product and then add again
+            for x in clr:
+                del_colour=Colour.objects.get(id=int(x['id']))
+                del_colour.delete()
+            
+
+            #now save colour 
+            for x in payload['product_colors']:
+                Colour.objects.create(colour_name=x['name'],colour_product=pro)
+            
+            #print(payload)
+            # check=False
+            # del_clr_id=[]
+           
+            # for y in clr:
+            #     for x in payload['product_colors']:
+            #         check=y['colour_name'] in x.values()
+            #         if (check):
+            #             break
+                
+            #     if check==False:
+            #         colour=Colour.objects.get(id=y['id'])
+            #         colour.delete()
+            #     check=False
+           
+
 
             if serializer.is_valid():
                 serializer.save()
