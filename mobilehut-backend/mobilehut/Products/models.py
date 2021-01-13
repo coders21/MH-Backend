@@ -28,4 +28,5 @@ class Product(models.Model):
 class Colour(models.Model):
     colour_name=models.CharField(max_length=20,blank=True)
     colour_product=models.ForeignKey(Product,on_delete=models.CASCADE)
+   
 

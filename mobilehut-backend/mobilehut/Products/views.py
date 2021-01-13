@@ -178,10 +178,19 @@ class CreateProduct(APIView):
 
     def post(self,request):
         payload=request.data
+        #print(payload)
         serializer = ProductSerializer(data=payload)
-
+        #product=Product.objects.create(product_name=payload['product_name'],product_quantity=payload['product_quantity'],product_price=int(payload['product_price']),product_sku=payload['product_sku'],product_description=payload['product_description'],product_model=payload['product_model'],product_category=int(payload['product_category']),product_brand=int(payload['product_brand']))
+        #product.save()
+        #print(payload)
+        #Product.objects.create("product_name")
+        
         if serializer.is_valid():
             serializer.save()
+            productobj=Product.objects.get(id=serializer.data['id'])
+            #now save colour 
+            for x in payload['product_colors']:
+                Colour.objects.create(colour_name=x['name'],colour_product=productobj)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -196,7 +205,22 @@ class ManageProduct(APIView):
             return Response('Product Not Found', status.HTTP_404_NOT_FOUND)
         else:
             serializer = ProductSerializer(pro)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            colour=Colour.objects.filter(colour_product=pro.id).values()
+            #print("colour is ===>",colour)
+            select_colour={}
+            append_color=[]
+            for x in range(0,len(colour)):
+                select_colour['id']=colour[x]['colour_name']
+                select_colour['name']=colour[x]['colour_name']
+                append_color.append(select_colour)
+                select_colour={}
+                
+            print(append_color)
+            product_data=serializer.data
+            product_data['colour']=append_color
+            
+            
+            return Response(product_data, status=status.HTTP_200_OK)
 
     def put(self, request, id):
 

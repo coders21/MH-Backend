@@ -55,7 +55,7 @@ class ColourSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Colour
-        fields = ['id','colour_name','colour_product']
+        fields = ['colour_name','colour_product','id']
 
     def create(self, validated_data):
         model = Colour.objects.create(**validated_data)
