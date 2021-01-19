@@ -22,4 +22,8 @@ urlpatterns = [
     url(r'^create_colour/$', views.CreateColour.as_view(), name='CreateColour'),
     url(r'^get_colour/$', views.CreateColour.as_view(), name='GetColour'),
     url(r'^manage_colour/(?P<id>\d+)/$', views.ManageColour.as_view(), name='ManageColour'),
+
+    url(r'^create_image/$', views.CreateProductImages.as_view(), name='CreateImages'),
+    url(r'^manage_images/(?P<id>\d+)/$', views.ManageProductImages.as_view(), name='EditImages'),
+
 ]

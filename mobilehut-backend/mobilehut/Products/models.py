@@ -21,12 +21,12 @@ class Product(models.Model):
     product_brand=models.ForeignKey(Brand,on_delete=models.CASCADE)
     product_model=models.ForeignKey(ModelType,on_delete=models.CASCADE)
 
-# class ProductImages(models.Model):
-#     image_name=models.ImageField(blank=True)
-#     image_product=models.ForeignKey(Product,on_delete=models.CASCADE)
 
 class Colour(models.Model):
     colour_name=models.CharField(max_length=20,blank=True)
     colour_product=models.ForeignKey(Product,on_delete=models.CASCADE)
    
 
+class ProductImages(models.Model):
+    image=models.ImageField(upload_to='product_images',null=True,blank=True)
+    image_product=models.ForeignKey(Product,on_delete=models.CASCADE)
