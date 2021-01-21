@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializer import ProductSerializer,CategorySerializer,BrandSerializer,ModelSerializer,ColourSerializer
-from .models import Product,Category,Brand,ModelType,Colour
+from .serializer import ProductSerializer,CategorySerializer,BrandSerializer,ModelSerializer,ColourSerializer,ProductImgSerializer
+from .models import Product,Category,Brand,ModelType,Colour,ProductImages
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 
 #### CATEGORY VIEWS ####
@@ -178,10 +179,19 @@ class CreateProduct(APIView):
 
     def post(self,request):
         payload=request.data
+        #print(payload)
         serializer = ProductSerializer(data=payload)
-
+        #product=Product.objects.create(product_name=payload['product_name'],product_quantity=payload['product_quantity'],product_price=int(payload['product_price']),product_sku=payload['product_sku'],product_description=payload['product_description'],product_model=payload['product_model'],product_category=int(payload['product_category']),product_brand=int(payload['product_brand']))
+        #product.save()
+        #print(payload)
+        #Product.objects.create("product_name")
+        
         if serializer.is_valid():
             serializer.save()
+            productobj=Product.objects.get(id=serializer.data['id'])
+            #now save colour 
+            for x in payload['product_colors']:
+                Colour.objects.create(colour_name=x['name'],colour_product=productobj)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -196,7 +206,21 @@ class ManageProduct(APIView):
             return Response('Product Not Found', status.HTTP_404_NOT_FOUND)
         else:
             serializer = ProductSerializer(pro)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            colour=Colour.objects.filter(colour_product=pro.id).values()
+            
+            select_colour={}
+            append_color=[]
+            for x in range(0,len(colour)):
+                select_colour['id']=colour[x]['colour_name']
+                select_colour['name']=colour[x]['colour_name']
+                append_color.append(select_colour)
+                select_colour={}
+                
+            product_data=serializer.data
+            product_data['product_colors']=append_color
+            
+            
+            return Response(product_data, status=status.HTTP_200_OK)
 
     def put(self, request, id):
 
@@ -207,6 +231,19 @@ class ManageProduct(APIView):
         else:
             payload = request.data
             serializer = ProductSerializer(pro,data=payload)
+            
+            clr=Colour.objects.filter(colour_product=pro.id).values()
+            # first delete all colours of existing product and then add again
+            for x in clr:
+                del_colour=Colour.objects.get(id=int(x['id']))
+                del_colour.delete()
+            
+
+            #now save colour 
+            for x in payload['product_colors']:
+                Colour.objects.create(colour_name=x['name'],colour_product=pro)
+            
+
 
             if serializer.is_valid():
                 serializer.save()
@@ -275,5 +312,50 @@ class ManageColour(APIView):
             return Response('Colour Not Found', status.HTTP_404_NOT_FOUND)
         else:
             color.delete()
+
+            return Response("Product Deleted",status=status.HTTP_200_OK)
+
+## IMAGE VIEWS ##
+class CreateProductImages(APIView):
+
+     parser_classes = (MultiPartParser, FormParser)
+
+     def get(self,request):
+        return Response([ProductImgSerializer(dat).data for dat in ProductImages.objects.all()])
+
+     def post(self,request):
+        payload=request.data
+        serializer=ProductImgSerializer(data=payload)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+## delete or add more images
+class ManageProductImages(APIView):
+
+    parser_classes = (MultiPartParser, FormParser)
+
+    def get(self, request, id):
+
+        try:
+            img = ProductImages.objects.filter(image_product=int(id)).values()
+        except (KeyError, ProductImages.DoesNotExist):
+            return Response('Product Images Not Found', status.HTTP_404_NOT_FOUND)
+        else:
+
+            #serializer = ProductImgSerializer(img)
+            return Response(img, status=status.HTTP_200_OK)
+
+    
+    def delete(self,request,id):
+
+        try:
+            delimg = ProductImages.objects.get(id=int(id))
+        except (KeyError, ProductImages.DoesNotExist):
+            return Response('Image Not Found', status.HTTP_404_NOT_FOUND)
+        else:
+            delimg.delete()
 
             return Response("Product Deleted",status=status.HTTP_200_OK)

@@ -16,16 +16,20 @@ class Product(models.Model):
     product_quantity=models.IntegerField(blank=True)
     product_sku=models.CharField(max_length=120,blank=True)
     product_description=models.CharField(max_length=5000,blank=True)
+    sale_price=models.IntegerField(blank=True)
+    saleprice_startdate=models.DateField(blank=True)
+    saleprice_enddate=models.DateField(blank=True)
     #product_reviews=models.FloatField(blank=True)
     product_category=models.ForeignKey(Category,on_delete=models.CASCADE)
     product_brand=models.ForeignKey(Brand,on_delete=models.CASCADE)
     product_model=models.ForeignKey(ModelType,on_delete=models.CASCADE)
-
-# class ProductImages(models.Model):
-#     image_name=models.ImageField(blank=True)
-#     image_product=models.ForeignKey(Product,on_delete=models.CASCADE)
+    
 
 class Colour(models.Model):
     colour_name=models.CharField(max_length=20,blank=True)
     colour_product=models.ForeignKey(Product,on_delete=models.CASCADE)
+   
 
+class ProductImages(models.Model):
+    image=models.ImageField(upload_to='product_images',null=True,blank=True)
+    image_product=models.ForeignKey(Product,on_delete=models.CASCADE)
