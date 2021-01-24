@@ -132,3 +132,48 @@ An online retail site through which user can do online shopping
   {
      "id":1
    }
+
+# Orders
+* To get,create all orders <br/>
+* http://127.0.0.1:8000/Orders/create_order/ <br/>
+* Endpoint format <br />
+ { <br />
+        "id": 1, <br />
+        "order_date": "2021-01-23", <br />
+        "order_status": "delivery failed", <br />
+        "order_returndate": "2021-01-24" <br />
+    }, <br />
+ * To edit Orders
+ * http://127.0.0.1:8000/Orders/manage_order/id <br/>
+ * { <br />
+        "id": 1, <br />
+        "order_date": "2021-01-23", <br />
+        "order_status": "delivery failed", <br />
+        "order_returndate": "2021-01-24" <br />
+    }, <br />
+
+# Product Orders
+* To create and get all product orders <br/>
+* http://127.0.0.1:8000/Orders/create_porder/ <br />
+* Endpoint <br/>
+* 
+    {
+        "id": 1, <br/>
+        "quantity": 24, <br/>
+        "product": 1, <br/>
+        "user": 1, <br />
+        "order": 1 <br />
+    }, <br/>
+* to edit http://127.0.0.1:8000/Orders/manage_porder/1 <br />
+
+# Get All brand,model,order,product
+* http://127.0.0.1:8000/Products/get_total/ <br/>
+
+* Endpoint <br/>
+{ <br/>
+    "total_brands": 1,<br/>
+    "total_models": 1,<br/>
+    "total_categories": 1,<br/>
+    "total_products": 1,<br/>
+    "total_orders": 2<br/>
+}
