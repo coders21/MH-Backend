@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializer import ProductSerializer,CategorySerializer,BrandSerializer,ModelSerializer,ColourSerializer,ProductImgSerializer
 from .models import Product,Category,Brand,ModelType,Colour,ProductImages
+from Orders.models import Order
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 
@@ -359,3 +360,32 @@ class ManageProductImages(APIView):
             delimg.delete()
 
             return Response("Product Deleted",status=status.HTTP_200_OK)
+
+
+# Get Total Brands,Models,Categories
+class GetTotal(APIView):
+
+    def get(self,request):
+
+        total={
+            "total_brands":0,
+            "total_models":0,
+            "total_categories":0,
+            "total_products":0,
+            "total_orders":0
+        }
+
+        total_brands=Brand.objects.all().values()
+        total_models=ModelType.objects.all().values()
+        total_categories=Category.objects.all().values()
+        total_products=Product.objects.all().values()
+        total_orders=Order.objects.all().values()
+       
+        total['total_brands']=len(total_brands)
+        total['total_models']=len(total_models)
+        total['total_categories']=len(total_categories)
+        total['total_products']=len(total_products)
+        total['total_orders']=len(total_orders)
+
+        return Response(total,status=status.HTTP_200_OK)
+

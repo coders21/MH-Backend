@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'authapp.apps.AuthappConfig',
     'Products.apps.ProductsConfig',
+    'Orders.apps.OrdersConfig',
     'corsheaders'  # new addition
 ]
 
