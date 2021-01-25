@@ -11,9 +11,6 @@ from rest_framework import status
 
 class CreateOrder(APIView):
 
-    def get(self,request):
-        return Response([OrderSerializer(od).data for od in Order.objects.all()])
-
     def post(self,request):
         payload=request.data
         serializer = OrderSerializer(data=payload)
@@ -22,6 +19,18 @@ class CreateOrder(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class GetOrder(APIView):
+
+    def post(self,request):
+        payload=request.data
+        try:
+            od = Order.objects.filter(order_status=payload['order_status']).values()
+        except (KeyError, Order.DoesNotExist):
+            return Response('Order Not Found', status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(od, status=status.HTTP_200_OK)
+
 
 
 class ManageOrder(APIView):
