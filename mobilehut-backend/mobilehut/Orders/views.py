@@ -111,11 +111,14 @@ class GetPOrder(APIView):
 
     def get(self,request,id):
         order_details=[]
-        order_info=Order.objects.filter(id=id).values()
+        product_details=[]
+        order_info=list(Order.objects.filter(id=id).values())
         porders=ProductOrder.objects.filter(order=id).values()
-        order_details.append(order_info[0])
+        
+        ##order_details.append(order_info[0])
         for x in range(0,len(porders)):
             prod=Product.objects.filter(id=porders[x]['product_id']).values()
-            order_details.append(prod[0])
+            product_details.append(prod[0])
         
-        return Response(order_details,status=status.HTTP_400_BAD_REQUEST)
+        order_info[0]['products']=product_details
+        return Response(order_info,status=status.HTTP_400_BAD_REQUEST)
