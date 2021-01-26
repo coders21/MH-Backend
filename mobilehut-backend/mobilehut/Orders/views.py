@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializer import OrderSerializer,ProductOrderSerializer
 from .models import Order,ProductOrder
+from Products.models import Product
 #from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 
@@ -105,3 +106,16 @@ class ManageProductOrder(APIView):
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
+
+class GetPOrder(APIView):
+
+    def get(self,request,id):
+        order_details=[]
+        order_info=Order.objects.filter(id=id).values()
+        porders=ProductOrder.objects.filter(order=id).values()
+        order_details.append(order_info[0])
+        for x in range(0,len(porders)):
+            prod=Product.objects.filter(id=porders[x]['product_id']).values()
+            order_details.append(prod[0])
+        
+        return Response(order_details,status=status.HTTP_400_BAD_REQUEST)
