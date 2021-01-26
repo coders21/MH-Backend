@@ -4,15 +4,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializer import OrderSerializer,ProductOrderSerializer
 from .models import Order,ProductOrder
+from Products.models import Product
 #from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 
 # Order Views
 
 class CreateOrder(APIView):
-
-    def get(self,request):
-        return Response([OrderSerializer(od).data for od in Order.objects.all()])
 
     def post(self,request):
         payload=request.data
@@ -22,6 +20,18 @@ class CreateOrder(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class GetOrder(APIView):
+
+    def post(self,request):
+        payload=request.data
+        try:
+            od = Order.objects.filter(order_status=payload['order_status']).values()
+        except (KeyError, Order.DoesNotExist):
+            return Response('Order Not Found', status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(od, status=status.HTTP_200_OK)
+
 
 
 class ManageOrder(APIView):
@@ -96,3 +106,19 @@ class ManageProductOrder(APIView):
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
+
+class GetPOrder(APIView):
+
+    def get(self,request,id):
+        order_details=[]
+        product_details=[]
+        order_info=list(Order.objects.filter(id=id).values())
+        porders=ProductOrder.objects.filter(order=id).values()
+        
+        ##order_details.append(order_info[0])
+        for x in range(0,len(porders)):
+            prod=Product.objects.filter(id=porders[x]['product_id']).values()
+            product_details.append(prod[0])
+        
+        order_info[0]['products']=product_details
+        return Response(order_info,status=status.HTTP_400_BAD_REQUEST)
