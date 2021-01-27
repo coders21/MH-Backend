@@ -1,1 +1,8 @@
 /mh_backend
+/mobilehut-backend/mobilehut/db.sqlite3
+/mobilehut-backend/mobilehut/authapp/migrations
+/mobilehut-backend/mobilehut/authapp/__pycache__
+/mobilehut-backend/mobilehut/Products/migrations
+/mobilehut-backend/mobilehut/Products/__pycache__
+/mobilehut-backend/mobilehut/Orders/migrations
+/mobilehut-backend/mobilehut/Orders/__pycache__

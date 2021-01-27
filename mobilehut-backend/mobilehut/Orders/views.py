@@ -121,4 +121,4 @@ class GetPOrder(APIView):
             product_details.append(prod[0])
         
         order_info[0]['products']=product_details
-        return Response(order_info,status=status.HTTP_400_BAD_REQUEST)
+        return Response(order_info,status=status.HTTP_200_OK)
