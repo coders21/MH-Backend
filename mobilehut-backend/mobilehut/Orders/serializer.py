@@ -17,6 +17,23 @@ class OrderSerializer(serializers.ModelSerializer):
             instance.save()
         return instance
 
+
+class OrderUpdateSerializer(serializers.ModelSerializer):  # status update
+
+    class Meta:
+        model = Order
+        fields = ['order_status','update_date']
+
+    def create(self, validated_data):
+        order_check = Order.objects.create(**validated_data)
+        return order_check
+
+    def update(self, instance, validated_data):
+        for k, v in validated_data.items():
+            setattr(instance, k, v)
+            instance.save()
+        return instance
+
 class ProductOrderSerializer(serializers.ModelSerializer):
 
     class Meta:

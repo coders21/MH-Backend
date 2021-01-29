@@ -47,6 +47,7 @@ class User(AbstractBaseUser,PermissionsMixin):
     province=models.CharField(max_length=30,blank=True)
     address=models.CharField(max_length=200,blank=True)
     date_joined = models.DateTimeField(null=True, blank=True)
+    phonenumber=models.CharField(null=True,blank=True,max_length=13)
     username = models.CharField(
 
         max_length=150,

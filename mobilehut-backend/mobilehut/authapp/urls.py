@@ -10,5 +10,7 @@ urlpatterns=[
 
     path('jwt/', obtain_jwt_token),
     path('jwt/refresh/', refresh_jwt_token),
+    path('create_user/', views.CreateUser.as_view(), name='CreateUser'),
+    path('manage_user/<int:id>/', views.ManageUser.as_view(), name='ManageUser'),
     
 ]
