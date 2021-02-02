@@ -27,7 +27,16 @@ class GetOrder(APIView):
     def post(self,request):
         payload=request.data
         try:
-            od = Order.objects.filter(order_status=payload['order_status']).values()
+            od = list(Order.objects.filter(order_status=payload['order_status']).values())
+        
+            for x in range(0,len(od)):
+                user=User.objects.get(id=od[x]['user_id'])
+                od[x]['customername']=user.username
+                od[x]['customercity']=user.city
+                od[x]['customerprovince']=user.province
+                od[x]['customeraddress']=user.address
+                od[x]['customerphonenumber']=user.phonenumber
+           
         except (KeyError, Order.DoesNotExist):
             return Response('Order Not Found', status.HTTP_404_NOT_FOUND)
         else:
@@ -113,20 +122,19 @@ class GetPOrder(APIView):
     def get(self,request,id):
         order_details=[]
         product_details=[]
-        order_info=list(Order.objects.filter(id=id).values())
+        #order_info=list(Order.objects.filter(id=id).values())
         porders=ProductOrder.objects.filter(order=id).values()
-        user=User.objects.get(id=order_info[0]['user_id'])
+        
       
         for x in range(0,len(porders)):
             prod=list(Product.objects.filter(id=porders[x]['product_id']).values())
             model=ModelType.objects.get(id=prod[0]['product_model_id'])
             prod[0]['model_name']=model.model_name
+            prod[0]['quantity']=porders[x]['quantity']
+            prod[0]['colour']=porders[x]['colour']
             product_details.append(prod[0])
         
-        order_info[0]['products']=product_details
-        order_info[0]['customername']=user.username
-        order_info[0]['customercity']=user.city
-        order_info[0]['customerprovince']=user.province
-        order_info[0]['customeraddress']=user.address
-        order_info[0]['customerphonenumber']=user.phonenumber
-        return Response(order_info,status=status.HTTP_200_OK)
+        my_dict={'products':None}
+        my_dict['products']=product_details
+        #order_info[0]['products']=product_details
+        return Response(my_dict,status=status.HTTP_200_OK)
