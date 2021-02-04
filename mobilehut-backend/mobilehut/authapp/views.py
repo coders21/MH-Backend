@@ -1,10 +1,12 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializer import UserSerializer,UserUpdateSerializer
+from .serializer import UserSerializer,UserUpdateSerializer,CustomTokenObtainPairSerializer
 from .models import User
 from rest_framework import status
-
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+)
 # Create your views here.
 
 class CreateUser(APIView):
@@ -58,3 +60,8 @@ class ManageUser(APIView):
             return Response('User Not Found', status.HTTP_404_NOT_FOUND)
         else:
             user.delete()
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):  # to add token and 
+    # Replace the serializer with your custom
+    serializer_class = CustomTokenObtainPairSerializer

@@ -3,13 +3,19 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializer import ProductSerializer,CategorySerializer,BrandSerializer,ModelSerializer,ColourSerializer,ProductImgSerializer
 from .models import Product,Category,Brand,ModelType,Colour,ProductImages
+from rest_framework.permissions import IsAuthenticated
 from Orders.models import Order
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
-
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication,TokenAuthentication
 #### CATEGORY VIEWS ####
 
+
 class CreateCategory(APIView):
+
+    permission_classes = [IsAuthenticated]
+   
 
     def get(self,request):
         return Response([CategorySerializer(cat).data for cat in Category.objects.all()])
