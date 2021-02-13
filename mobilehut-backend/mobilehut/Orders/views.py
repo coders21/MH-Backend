@@ -6,12 +6,15 @@ from .serializer import OrderSerializer,OrderUpdateSerializer,ProductOrderSerial
 from .models import Order,ProductOrder
 from Products.models import Product,ModelType
 from authapp.models import User
+from rest_framework.permissions import IsAuthenticated
 #from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 
 # Order Views
 
 class CreateOrder(APIView):
+
+    permission_classes = [IsAuthenticated]
 
     def post(self,request):
         payload=request.data
@@ -23,6 +26,8 @@ class CreateOrder(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class GetOrder(APIView):
+
+    permission_classes = [IsAuthenticated]
 
     def post(self,request):
         payload=request.data
@@ -45,6 +50,8 @@ class GetOrder(APIView):
 
 
 class ManageOrder(APIView):
+
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, id):
 
@@ -76,6 +83,8 @@ class ManageOrder(APIView):
 
 class CreateProductOrder(APIView):
 
+    permission_classes = [IsAuthenticated]
+
     def get(self,request):
         return Response([ProductOrderSerializer(od).data for od in ProductOrder.objects.all()])
 
@@ -90,6 +99,8 @@ class CreateProductOrder(APIView):
 
 
 class ManageProductOrder(APIView):
+
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, id):
 
@@ -118,6 +129,8 @@ class ManageProductOrder(APIView):
     
 
 class GetPOrder(APIView):
+
+    permission_classes = [IsAuthenticated]
 
     def get(self,request,id):
         order_details=[]

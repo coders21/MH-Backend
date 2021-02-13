@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'authapp.apps.AuthappConfig',
     'Products.apps.ProductsConfig',
     'Orders.apps.OrdersConfig',
+    'Homepage.apps.HomepageConfig',
     'corsheaders',  # new addition
     'rest_framework.authtoken',
 ]

@@ -9,5 +9,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^AuthApp/', include('authapp.urls')),
     url(r'^Products/',include('Products.urls')),
-    url(r'^Orders/',include('Orders.urls'))
+    url(r'^Orders/',include('Orders.urls')),
+    url(r'^HomePage/',include('Homepage.urls'))
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -8,13 +8,13 @@ from Orders.models import Order
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication,TokenAuthentication
+#from rest_framework.authentication import SessionAuthentication, BasicAuthentication,TokenAuthentication
 #### CATEGORY VIEWS ####
 
 
 class CreateCategory(APIView):
 
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
    
 
     def get(self,request):
@@ -31,6 +31,8 @@ class CreateCategory(APIView):
 
 
 class ManageCategory(APIView):
+
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, id):
 
@@ -72,6 +74,8 @@ class ManageCategory(APIView):
 
 class CreateBrand(APIView):
 
+    permission_classes = [IsAuthenticated]
+
     def get(self,request):
         return Response([BrandSerializer(dat).data for dat in Brand.objects.all()])
 
@@ -86,6 +90,8 @@ class CreateBrand(APIView):
 
 
 class ManageBrand(APIView):
+
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, id):
 
@@ -127,6 +133,8 @@ class ManageBrand(APIView):
 
 class CreateModel(APIView):
 
+    permission_classes = [IsAuthenticated]
+
     def get(self,request):
         return Response([ModelSerializer(dat).data for dat in ModelType.objects.all()])
 
@@ -141,6 +149,8 @@ class CreateModel(APIView):
 
 
 class ManageModel(APIView):
+
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, id):
 
@@ -181,6 +191,8 @@ class ManageModel(APIView):
 #### PRODUCT VIEWS ####
 class CreateProduct(APIView):
 
+    permission_classes = [IsAuthenticated]
+
     def get(self,request):
         return Response([ProductSerializer(dat).data for dat in Product.objects.all()])
 
@@ -204,6 +216,8 @@ class CreateProduct(APIView):
 
 
 class ManageProduct(APIView):
+
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, id):
 
@@ -271,6 +285,8 @@ class ManageProduct(APIView):
 #### Color VIEWS ####
 class CreateColour(APIView):
 
+    permission_classes = [IsAuthenticated]
+
     def get(self,request):
         return Response([ColourSerializer(dat).data for dat in Colour.objects.all()])
 
@@ -285,6 +301,8 @@ class CreateColour(APIView):
 
 
 class ManageColour(APIView):
+
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, id):
 
@@ -325,6 +343,8 @@ class ManageColour(APIView):
 ## IMAGE VIEWS ##
 class CreateProductImages(APIView):
 
+     #permission_classes = [IsAuthenticated]
+
      parser_classes = (MultiPartParser, FormParser)
 
      def get(self,request):
@@ -342,6 +362,7 @@ class CreateProductImages(APIView):
 ## delete or add more images
 class ManageProductImages(APIView):
 
+    permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser)
 
     def get(self, request, id):
@@ -370,6 +391,8 @@ class ManageProductImages(APIView):
 
 # Get Total Brands,Models,Categories
 class GetTotal(APIView):
+
+    permission_classes = [IsAuthenticated]
 
     def get(self,request):
 
