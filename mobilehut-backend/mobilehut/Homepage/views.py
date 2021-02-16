@@ -3,8 +3,75 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from Products.models import Category,Product,ProductImages,Brand
 from rest_framework import status
+from rest_framework import generics
+from .models import Carousel,OneBanner,ThreeBanner,Sale,ProductSale,RecommendedProduct
+from .serializer import CarouselSerializer,OneBannerSerializer,ThreeBannerSerializer,SaleSerializer,RecommendedProductSerializer,ProductSaleSerializer
 
 
+class CreateCarousel(generics.ListCreateAPIView):
+    queryset=Carousel.objects.all()
+    serializer_class=CarouselSerializer
+    
+
+class ManageCarousel(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Carousel.objects.all()
+    serializer_class = CarouselSerializer
+    lookup_field = 'pk'
+    
+
+class CreateThreeBanner(generics.ListCreateAPIView):
+    queryset=ThreeBanner.objects.all()
+    serializer_class=ThreeBannerSerializer
+    
+
+class ManageThreeBanner(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ThreeBanner.objects.all()
+    serializer_class = ThreeBannerSerializer
+    lookup_field = 'pk'
+    
+
+class CreateOneBanner(generics.ListCreateAPIView):
+    queryset=OneBanner.objects.all()
+    serializer_class=OneBannerSerializer
+    
+
+class ManageOneBanner(generics.RetrieveUpdateDestroyAPIView):
+    queryset = OneBanner.objects.all()
+    serializer_class = OneBannerSerializer
+    lookup_field = 'pk'
+    
+
+class CreateSale(generics.ListCreateAPIView):
+    queryset=Sale.objects.all()
+    serializer_class=SaleSerializer
+    
+
+class ManageSale(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Sale.objects.all()
+    serializer_class = SaleSerializer
+    lookup_field = 'pk'
+    
+
+class CreateProductSale(generics.ListCreateAPIView):
+    queryset=ProductSale.objects.all()
+    serializer_class=ProductSaleSerializer
+
+class ManageProductSale(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ProductSale.objects.all()
+    serializer_class = ProductSaleSerializer
+    lookup_field = 'pk'
+    
+
+class CreateRecommendedProduct(generics.ListCreateAPIView):
+    queryset=RecommendedProduct.objects.all()
+    serializer_class=RecommendedProductSerializer
+    
+
+class ManageRecommendedProduct (generics.RetrieveUpdateDestroyAPIView):
+    queryset = RecommendedProduct.objects.all()
+    serializer_class = RecommendedProductSerializer
+    lookup_field = 'pk'
+    
 
 class GetHomeData(APIView):
 
