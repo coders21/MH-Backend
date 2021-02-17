@@ -6,36 +6,42 @@ from rest_framework import status
 from rest_framework import generics
 from .models import Carousel,OneBanner,ThreeBanner,Sale,ProductSale,RecommendedProduct
 from .serializer import CarouselSerializer,OneBannerSerializer,ThreeBannerSerializer,SaleSerializer,RecommendedProductSerializer,ProductSaleSerializer
-
+from rest_framework.parsers import MultiPartParser, FormParser
 
 class CreateCarousel(generics.ListCreateAPIView):
+    parser_classes = (MultiPartParser, FormParser)
     queryset=Carousel.objects.all()
     serializer_class=CarouselSerializer
     
 
 class ManageCarousel(generics.RetrieveUpdateDestroyAPIView):
+    parser_classes = (MultiPartParser, FormParser)
     queryset = Carousel.objects.all()
     serializer_class = CarouselSerializer
     lookup_field = 'pk'
     
 
 class CreateThreeBanner(generics.ListCreateAPIView):
+    parser_classes = (MultiPartParser, FormParser)
     queryset=ThreeBanner.objects.all()
     serializer_class=ThreeBannerSerializer
     
 
 class ManageThreeBanner(generics.RetrieveUpdateDestroyAPIView):
+    parser_classes = (MultiPartParser, FormParser)
     queryset = ThreeBanner.objects.all()
     serializer_class = ThreeBannerSerializer
     lookup_field = 'pk'
     
 
 class CreateOneBanner(generics.ListCreateAPIView):
+    parser_classes = (MultiPartParser, FormParser)
     queryset=OneBanner.objects.all()
     serializer_class=OneBannerSerializer
     
 
 class ManageOneBanner(generics.RetrieveUpdateDestroyAPIView):
+    parser_classes = (MultiPartParser, FormParser)
     queryset = OneBanner.objects.all()
     serializer_class = OneBannerSerializer
     lookup_field = 'pk'
@@ -50,7 +56,23 @@ class ManageSale(generics.RetrieveUpdateDestroyAPIView):
     queryset = Sale.objects.all()
     serializer_class = SaleSerializer
     lookup_field = 'pk'
-    
+
+class GetSaleProduct(APIView):
+
+    # def get(self,request,id):
+    #     prod=ProductSale.objects.filter(sale=id).select_related('product')
+    #     sale_product=[]
+    #     for prod in prod:
+    #         prod.
+    #         # sale_product.append({"product_name":prod.product_name,"product_price":prod.product_price,
+    #         # "sale_price":prod.sale_price,"saleprice_startdate":prod.saleprice_startdate,
+    #         # "saleprice_enddate":prod.saleprice_enddate})
+        
+    #     sale_data={}
+    #     sale_data['sale_product']=sale_product
+        
+    #     return Response(sale_data,status=status.HTTP_200_OK)
+
 
 class CreateProductSale(generics.ListCreateAPIView):
     queryset=ProductSale.objects.all()
@@ -137,4 +159,4 @@ class GetHomeData(APIView):
        
     
 
-        return Response(homepagedata)
+        return Response(homepagedata,status=status.HTTP_200_OK)
