@@ -58,6 +58,7 @@ class ManageSale(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'pk'
 
 class GetSaleProduct(APIView):
+    pass
 
     # def get(self,request,id):
     #     prod=ProductSale.objects.filter(sale=id).select_related('product')
