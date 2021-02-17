@@ -7,6 +7,9 @@ from rest_framework import generics
 from .models import Carousel,OneBanner,ThreeBanner,Sale,ProductSale,RecommendedProduct
 from .serializer import CarouselSerializer,OneBannerSerializer,ThreeBannerSerializer,SaleSerializer,RecommendedProductSerializer,ProductSaleSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
+from django.conf import settings
+from django.db import connection, reset_queries
+
 
 class CreateCarousel(generics.ListCreateAPIView):
     parser_classes = (MultiPartParser, FormParser)
@@ -58,21 +61,27 @@ class ManageSale(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'pk'
 
 class GetSaleProduct(APIView):
-    pass
 
-    # def get(self,request,id):
-    #     prod=ProductSale.objects.filter(sale=id).select_related('product')
-    #     sale_product=[]
-    #     for prod in prod:
-    #         prod.
-    #         # sale_product.append({"product_name":prod.product_name,"product_price":prod.product_price,
-    #         # "sale_price":prod.sale_price,"saleprice_startdate":prod.saleprice_startdate,
-    #         # "saleprice_enddate":prod.saleprice_enddate})
+    def get(self,request,id):
+        reset=True
+        prod=ProductSale.objects.filter(sale=id).select_related('product')
+        sale_product=[]
+        for prod in prod:
+            sale_product.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"product_price":prod.product.product_price,
+            "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
+            "saleprice_enddate":prod.product.saleprice_enddate})
         
-    #     sale_data={}
-    #     sale_data['sale_product']=sale_product
+        sale_data={}
+        sale_data['sale_product']=sale_product
+
+        # print(len(connection.queries))
+
+        # if reset:
+        #     reset_queries()
+
+       
         
-    #     return Response(sale_data,status=status.HTTP_200_OK)
+        return Response(sale_data,status=status.HTTP_200_OK)
 
 
 class CreateProductSale(generics.ListCreateAPIView):
