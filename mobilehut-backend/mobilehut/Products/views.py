@@ -201,13 +201,8 @@ class CreateProduct(APIView):
     def post(self,request):
         payload=request.data
         payload['created_date']=datetime.today().strftime('%Y-%m-%d')
-        #print(payload)
         serializer = ProductSerializer(data=payload)
-        #product=Product.objects.create(product_name=payload['product_name'],product_quantity=payload['product_quantity'],product_price=int(payload['product_price']),product_sku=payload['product_sku'],product_description=payload['product_description'],product_model=payload['product_model'],product_category=int(payload['product_category']),product_brand=int(payload['product_brand']))
-        #product.save()
-        #print(payload)
-        #Product.objects.create("product_name")
-        
+
         if serializer.is_valid():
             serializer.save()         
             category=Category.objects.get(id=serializer.data['product_category'])
