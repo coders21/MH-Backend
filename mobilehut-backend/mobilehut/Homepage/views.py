@@ -9,7 +9,8 @@ from .serializer import CarouselSerializer,OneBannerSerializer,ThreeBannerSerial
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.conf import settings
 from django.db import connection, reset_queries
-
+from datetime import datetime
+import random
 
 class CreateCarousel(generics.ListCreateAPIView):
     parser_classes = (MultiPartParser, FormParser)
@@ -63,7 +64,7 @@ class ManageSale(generics.RetrieveUpdateDestroyAPIView):
 class GetSaleProduct(APIView):
 
     def get(self,request,id):
-        reset=True
+        #reset=True
         prod=ProductSale.objects.filter(sale=id).select_related('product')
         sale_product=[]
         for prod in prod:
@@ -108,63 +109,71 @@ class ManageRecommendedProduct (generics.RetrieveUpdateDestroyAPIView):
 class GetHomeData(APIView):
 
     def get(self,request):
+        carousel=Carousel.objects.all().values()
         main_banner_carousel={
-            "carousel":
-            [
-                {
-                    "image":"product_images/main.png"
-                },
-                {
-                    "image":"product_images/main.png"
-                }
-            ]
+            "carousel":carousel
         }
-
-
         categories=Category.objects.all().values()
         
         homepagedata={}
         homepagedata['carousel']=main_banner_carousel['carousel']
         homepagedata['category']=categories
-        brands=Brand.objects.all().order_by('id')[:6].values()
+        brands=Brand.objects.all().order_by('id')[:8].values()
         homepagedata['brands']=brands
-        prod=Product.objects.filter().order_by('id')[:2].prefetch_related('productimages_set')
-        flash_product=[]
-       
-        for prod in prod:
-            images=prod.productimages_set.all().order_by('id')[:2].values()
-            # check of start date and end date
-            flash_product.append({"product_name":prod.product_name,"product_price":prod.product_price,
-            "sale_price":prod.sale_price,"saleprice_startdate":prod.saleprice_startdate,
-            "saleprice_enddate":prod.saleprice_enddate,"product_reviews":4.5,"review_count":2,
-            "product_images":images})
+        #prod=Product.objects.filter().order_by('id')[:2].prefetch_related('productimages_set')
+        sale_product=[]
+        try:
+            sale=Sale.objects.get(startdate__lte=datetime.today().strftime('%Y-%m-%d'),enddate__gte=datetime.today().strftime('%Y-%m-%d'))
+        except (KeyError, Sale.DoesNotExist):
+            pass
+        else:
+            prod=ProductSale.objects.filter(sale=sale.id).select_related('product')
+            for prod in prod:
+                sale_product.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"product_price":prod.product.product_price,
+                "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
+                "saleprice_enddate":prod.product.saleprice_enddate,"product_review":prod.product.product_reviews,"review_count":prod.product.review_count})
+                homepagedata['sale']={
+                    "startdate":sale.startdate,
+                    "enddate":sale.enddate,
+                    "salename":sale.name,
+                    "product":sale_product
+                 }
         
-        homepagedata['flashsale']={
-            "enddate":"2019-09-02",
-            "product":flash_product
-        }
-        
-        homepagedata['one_banner']="product_images/main.png"
 
-
+        one_banner=OneBanner.objects.all().values()
+        homepagedata['one_banner']=one_banner
+        threebanner=ThreeBanner.objects.all().values()
         three_banner={
-            "banner":[
-                 {
-                    "image":"product_images/main.png"
-                },
-                {
-                    "image":"product_images/main.png"
-                }
-                ,
-                {
-                    "image":"product_images/main.png"
-                }
-            ]
+            "banner":threebanner
         }
-
         homepagedata['three_banner']=three_banner['banner']
-        homepagedata['trending_products']=flash_product
-        homepagedata['new_arrival_product']=flash_product
+        
+        trend_products=Product.objects.all().order_by('review_count')[:8].values()
+        homepagedata['trending_products']=trend_products
+
+        prod=RecommendedProduct.objects.all()[:8].select_related('product')
+        recommended=[]
+        for prod in prod:
+            recommended.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"product_price":prod.product.product_price,
+                "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
+                "saleprice_enddate":prod.product.saleprice_enddate,"product_review":prod.product.product_reviews,"review_count":prod.product.review_count})
+        homepagedata['recommended_product']=recommended
+
+        
+        new_arrival_product=Product.objects.all().values()
+        select_new_arrival=[]
+
+        for new_arrival_product in new_arrival_product:
+            mydate=new_arrival_product['created_date']
+            if mydate.strftime("%m")==datetime.today().strftime("%m"):
+               select_new_arrival.append(new_arrival_product)
+        
+        if len(select_new_arrival)>7:
+            random_products_arrival=random.sample(select_new_arrival,8)
+        else:
+            random_products_arrival=select_new_arrival
+
+        homepagedata['new_arrival_product']=random_products_arrival
 
        
     
