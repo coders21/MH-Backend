@@ -86,9 +86,13 @@ class ProductSaleSerializer(serializers.ModelSerializer):
 
 class RecommendedProductSerializer(serializers.ModelSerializer):
 
+    product_name= serializers.StringRelatedField()
+    product_category= serializers.StringRelatedField()
+    product_sku= serializers.StringRelatedField()
+
     class Meta:
         model = RecommendedProduct
-        fields = '__all__'
+        fields = ['id','product','product_name','product_category','product_sku']
 
     def create(self, validated_data):
         RP = RecommendedProduct.objects.create(**validated_data)
@@ -99,4 +103,11 @@ class RecommendedProductSerializer(serializers.ModelSerializer):
             setattr(instance, k, v)
             instance.save()
         return instance
+    
+    def to_representation(self, instance):
+        rep = super(RecommendedProductSerializer, self).to_representation(instance)
+        rep['product_name'] = instance.product.product_name
+        rep['product_category'] = instance.product.category_name
+        rep['product_sku']= instance.product.product_sku
+        return rep
 
