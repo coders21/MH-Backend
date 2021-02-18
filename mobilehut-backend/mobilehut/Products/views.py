@@ -8,6 +8,7 @@ from Orders.models import Order
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
+from datetime import datetime
 #from rest_framework.authentication import SessionAuthentication, BasicAuthentication,TokenAuthentication
 #### CATEGORY VIEWS ####
 
@@ -75,7 +76,7 @@ class ManageCategory(APIView):
 class CreateBrand(APIView):
 
     permission_classes = [IsAuthenticated]
-
+    parser_classes = (MultiPartParser, FormParser)
     def get(self,request):
         return Response([BrandSerializer(dat).data for dat in Brand.objects.all()])
 
@@ -92,6 +93,7 @@ class CreateBrand(APIView):
 class ManageBrand(APIView):
 
     permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser)
 
     def get(self, request, id):
 
@@ -198,6 +200,7 @@ class CreateProduct(APIView):
 
     def post(self,request):
         payload=request.data
+        payload['created_date']=datetime.today().strftime('%Y-%m-%d')
         #print(payload)
         serializer = ProductSerializer(data=payload)
         #product=Product.objects.create(product_name=payload['product_name'],product_quantity=payload['product_quantity'],product_price=int(payload['product_price']),product_sku=payload['product_sku'],product_description=payload['product_description'],product_model=payload['product_model'],product_category=int(payload['product_category']),product_brand=int(payload['product_brand']))
@@ -206,8 +209,11 @@ class CreateProduct(APIView):
         #Product.objects.create("product_name")
         
         if serializer.is_valid():
-            serializer.save()
+            serializer.save()         
+            category=Category.objects.get(id=serializer.data['product_category'])
             productobj=Product.objects.get(id=serializer.data['id'])
+            productobj.category_name=category.category_name
+            productobj.save()
             #now save colour 
             for x in payload['product_colors']:
                 Colour.objects.create(colour_name=x['name'],colour_product=productobj)
@@ -268,6 +274,10 @@ class ManageProduct(APIView):
 
             if serializer.is_valid():
                 serializer.save()
+                category=Category.objects.get(id=serializer.data['product_category'])
+                productobj=Product.objects.get(id=serializer.data['id'])
+                productobj.category_name=category.category_name
+                productobj.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     

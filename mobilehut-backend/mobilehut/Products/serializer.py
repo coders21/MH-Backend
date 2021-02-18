@@ -23,7 +23,7 @@ class BrandSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Brand
-        fields = ['id','brand_name']
+        fields = ['id','brand_name','brand_image']
 
     def create(self, validated_data):
         brnd = Brand.objects.create(**validated_data)

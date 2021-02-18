@@ -17,7 +17,7 @@ urlpatterns = [
     url(r'^manage_sale/(?P<pk>\d+)/$', views.ManageSale.as_view(), name='ManageSale'),
 
     url(r'^create_product_sale/$', views.CreateProductSale.as_view(), name='CreateProductSale'),
-    url(r'^manage_product_sale/(?P<pk>\d+)/$', views.ManageProductSale.as_view(), name='ManageProductSale'),
+    url(r'^manage_product_sale/(?P<id>\d+)/$', views.ManageProductSale.as_view(), name='ManageProductSale'),
     url(r'^get_product_sale/(?P<id>\d+)/$',views.GetSaleProduct.as_view(),name='SaleProduct'),
 
     url(r'^create_recommended_product/$', views.CreateRecommendedProduct.as_view(), name='CreateRProduct'),

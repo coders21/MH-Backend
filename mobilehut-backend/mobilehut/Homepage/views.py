@@ -75,12 +75,6 @@ class GetSaleProduct(APIView):
         sale_data={}
         sale_data['sale_product']=sale_product
 
-        # print(len(connection.queries))
-
-        # if reset:
-        #     reset_queries()
-
-       
         
         return Response(sale_data,status=status.HTTP_200_OK)
 
@@ -89,10 +83,12 @@ class CreateProductSale(generics.ListCreateAPIView):
     queryset=ProductSale.objects.all()
     serializer_class=ProductSaleSerializer
 
-class ManageProductSale(generics.RetrieveUpdateDestroyAPIView):
-    queryset = ProductSale.objects.all()
-    serializer_class = ProductSaleSerializer
-    lookup_field = 'pk'
+class ManageProductSale(APIView):
+
+    def delete (self,request,id):
+        del_sale=ProductSale.objects.get(product=id)
+        del_sale.delete()
+        return Response ("Product Removed",status=status.HTTP_200_OK)
     
 
 class CreateRecommendedProduct(generics.ListCreateAPIView):
@@ -122,6 +118,7 @@ class GetHomeData(APIView):
         homepagedata['brands']=brands
         #prod=Product.objects.filter().order_by('id')[:2].prefetch_related('productimages_set')
         sale_product=[]
+        save_val=True
         try:
             sale=Sale.objects.get(startdate__lte=datetime.today().strftime('%Y-%m-%d'),enddate__gte=datetime.today().strftime('%Y-%m-%d'))
         except (KeyError, Sale.DoesNotExist):
@@ -129,15 +126,21 @@ class GetHomeData(APIView):
         else:
             prod=ProductSale.objects.filter(sale=sale.id).select_related('product')
             for prod in prod:
-                sale_product.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"product_price":prod.product.product_price,
-                "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
-                "saleprice_enddate":prod.product.saleprice_enddate,"product_review":prod.product.product_reviews,"review_count":prod.product.review_count})
-                homepagedata['sale']={
+                for x in range (0,len(sale_product)): # check duplicate
+                        if prod.product.id==sale_product[x]['product_id']:
+                            save_val=False
+                            break
+                if save_val:
+                    sale_product.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"product_price":prod.product.product_price,
+                    "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
+                    "saleprice_enddate":prod.product.saleprice_enddate,"category_name":prod.product.category_name,"product_review":prod.product.product_reviews,"review_count":prod.product.review_count})
+                save_val=True
+            homepagedata['sale']={
                     "startdate":sale.startdate,
                     "enddate":sale.enddate,
                     "salename":sale.name,
                     "product":sale_product
-                 }
+            }
         
 
         one_banner=OneBanner.objects.all().values()
@@ -154,7 +157,7 @@ class GetHomeData(APIView):
         prod=RecommendedProduct.objects.all()[:8].select_related('product')
         recommended=[]
         for prod in prod:
-            recommended.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"product_price":prod.product.product_price,
+            recommended.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"category_name":prod.product.category_name,"product_price":prod.product.product_price,
                 "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
                 "saleprice_enddate":prod.product.saleprice_enddate,"product_review":prod.product.product_reviews,"review_count":prod.product.review_count})
         homepagedata['recommended_product']=recommended
