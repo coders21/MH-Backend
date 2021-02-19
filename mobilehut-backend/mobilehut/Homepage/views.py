@@ -136,7 +136,8 @@ class GetHomeData(APIView):
         homepagedata['category']=categories
         brands=Brand.objects.all().order_by('id')[:8].values()
         homepagedata['brands']=brands
-        #prod=Product.objects.filter().order_by('id')[:2].prefetch_related('productimages_set')
+        
+
         sale_product=[]
         save_val=True
         try:
@@ -151,9 +152,11 @@ class GetHomeData(APIView):
                             save_val=False
                             break
                 if save_val:
+                    images=prod.product.productimages_set.all().order_by('id')[:2].values()
                     sale_product.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"product_price":prod.product.product_price,
                     "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
-                    "saleprice_enddate":prod.product.saleprice_enddate,"category_name":prod.product.category_name,"product_review":prod.product.product_reviews,"review_count":prod.product.review_count})
+                    "saleprice_enddate":prod.product.saleprice_enddate,"category_name":prod.product.category_name,"product_review":prod.product.product_reviews,"review_count":prod.product.review_count,
+                    "product_images":images})
                 save_val=True
             homepagedata['sale']={
                     "startdate":sale.startdate,
@@ -171,25 +174,41 @@ class GetHomeData(APIView):
         }
         homepagedata['three_banner']=three_banner['banner']
         
-        trend_products=Product.objects.all().order_by('review_count')[:8].values()
+        prod=Product.objects.all().order_by('review_count')[:8]
+        trend_products=[]
+        for prod in prod:
+            images=prod.productimages_set.all().order_by('id')[:2].values()
+            trend_products.append({"product_id":prod.id,"product_name":prod.product_name,"category_name":prod.category_name,"product_price":prod.product_price,
+                "sale_price":prod.sale_price,"saleprice_startdate":prod.saleprice_startdate,
+                "saleprice_enddate":prod.saleprice_enddate,"product_review":prod.product_reviews,"review_count":prod.review_count,"product_images":images})
+       
         homepagedata['trending_products']=trend_products
 
         prod=RecommendedProduct.objects.all()[:8].select_related('product')
         recommended=[]
         for prod in prod:
+            images=prod.product.productimages_set.all().order_by('id')[:2].values()
             recommended.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"category_name":prod.product.category_name,"product_price":prod.product.product_price,
                 "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
-                "saleprice_enddate":prod.product.saleprice_enddate,"product_review":prod.product.product_reviews,"review_count":prod.product.review_count})
+                "saleprice_enddate":prod.product.saleprice_enddate,"product_review":prod.product.product_reviews,"review_count":prod.product.review_count,"product_images":images})
         homepagedata['recommended_product']=recommended
 
         
-        new_arrival_product=Product.objects.all().values()
+        prod=Product.objects.all().prefetch_related('productimages_set')
+        new_arrival_product=[]
+        for prod in prod:
+            images=prod.productimages_set.all().order_by('id')[:2].values()
+            new_arrival_product.append({"product_id":prod.id,"product_name":prod.product_name,"category_name":prod.category_name,"product_price":prod.product_price,
+                "sale_price":prod.sale_price,"saleprice_startdate":prod.saleprice_startdate,"created_date":prod.created_date,
+                "saleprice_enddate":prod.saleprice_enddate,"product_review":prod.product_reviews,"review_count":prod.review_count,"product_images":images})
+            
+       
         select_new_arrival=[]
-
-        for new_arrival_product in new_arrival_product:
-            mydate=new_arrival_product['created_date']
+        
+        for  x in range(0,len(new_arrival_product)):
+            mydate=new_arrival_product[x]['created_date']
             if mydate.strftime("%m")==datetime.today().strftime("%m"):
-               select_new_arrival.append(new_arrival_product)
+               select_new_arrival.append(new_arrival_product[x])
         
         if len(select_new_arrival)>7:
             random_products_arrival=random.sample(select_new_arrival,8)
@@ -197,7 +216,7 @@ class GetHomeData(APIView):
             random_products_arrival=select_new_arrival
 
         homepagedata['new_arrival_product']=random_products_arrival
-
+        
        
     
 
