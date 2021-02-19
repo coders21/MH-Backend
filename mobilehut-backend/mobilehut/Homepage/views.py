@@ -91,9 +91,29 @@ class ManageProductSale(APIView):
         return Response ("Product Removed",status=status.HTTP_200_OK)
     
 
-class CreateRecommendedProduct(generics.ListCreateAPIView):
-    queryset=RecommendedProduct.objects.all()
-    serializer_class=RecommendedProductSerializer
+class CreateRecommendedProduct(APIView):
+
+    def get(self,request):
+         return Response([RecommendedProductSerializer(dat).data for dat in RecommendedProduct.objects.all()])
+    
+    def post(self,request):
+        payload=request.data
+        
+        
+        try:
+            rp=RecommendedProduct.objects.filter(product=payload['product'])
+            
+            if len(rp)>0:
+                return Response("Product already exists",status=status.HTTP_200_OK)
+            else:
+                payload=request.data
+                serializer = RecommendedProductSerializer(data=payload)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            pass
     
 
 class ManageRecommendedProduct (generics.RetrieveUpdateDestroyAPIView):
