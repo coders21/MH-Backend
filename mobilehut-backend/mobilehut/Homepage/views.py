@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from Products.models import Category,Product,ProductImages,Brand
 from rest_framework import status
 from rest_framework import generics
-from .models import Carousel,OneBanner,ThreeBanner,Sale,ProductSale,RecommendedProduct
+from .models import Carousel,OneBanner,ThreeBanner,Sale,ProductSale,RecommendedProduct,TrendingProductImage
 from .serializer import CarouselSerializer,OneBannerSerializer,ThreeBannerSerializer,SaleSerializer,RecommendedProductSerializer,ProductSaleSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.conf import settings
@@ -79,9 +79,29 @@ class GetSaleProduct(APIView):
         return Response(sale_data,status=status.HTTP_200_OK)
 
 
-class CreateProductSale(generics.ListCreateAPIView):
-    queryset=ProductSale.objects.all()
-    serializer_class=ProductSaleSerializer
+class CreateProductSale(APIView):
+
+     def get(self,request):
+         return Response([ProductSaleSerializer(dat).data for dat in ProductSale.objects.all()])
+    
+     def post(self,request):
+
+        payload=request.data
+        try:
+            ps=ProductSale.objects.filter(product=payload['product'])
+            
+            if len(ps)>0:
+                return Response("Product already exists",status=status.HTTP_200_OK)
+            else:
+                payload=request.data
+                serializer = ProductSaleSerializer(data=payload)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            pass
+
 
 class ManageProductSale(APIView):
 
@@ -134,7 +154,7 @@ class GetHomeData(APIView):
         homepagedata={}
         homepagedata['carousel']=main_banner_carousel['carousel']
         homepagedata['category']=categories
-        brands=Brand.objects.all().order_by('id')[:8].values()
+        brands=Brand.objects.all().order_by('id')[:6].values()
         homepagedata['brands']=brands
         
 
@@ -216,8 +236,10 @@ class GetHomeData(APIView):
             random_products_arrival=select_new_arrival
 
         homepagedata['new_arrival_product']=random_products_arrival
+
+        # trend_image=TrendingProductImage.objects.all().values()
+        # homepage['trending_image']=trend_image
         
-       
-    
+        
 
         return Response(homepagedata,status=status.HTTP_200_OK)

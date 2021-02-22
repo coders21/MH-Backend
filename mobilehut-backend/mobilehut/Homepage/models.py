@@ -38,3 +38,7 @@ class ProductSale(models.Model):
 
 class RecommendedProduct(models.Model):
     product=models.ForeignKey(Product,on_delete=models.CASCADE)
+
+
+class TrendingProductImage(models.Model):
+    trend_image=models.ImageField(upload_to="TrendingProductImage",null=True,blank=True)
