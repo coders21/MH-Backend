@@ -23,4 +23,5 @@ urlpatterns = [
     url(r'^create_recommended_product/$', views.CreateRecommendedProduct.as_view(), name='CreateRProduct'),
     url(r'^manage_recommended_product/(?P<pk>\d+)/$', views.ManageRecommendedProduct.as_view(), name='ManageRProduct'),
     
+    
 ]

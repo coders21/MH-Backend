@@ -423,3 +423,35 @@ class GetTotal(APIView):
 
         return Response(total,status=status.HTTP_200_OK)
 
+
+
+class DetailProduct(APIView):
+
+    def get(self,request,id):
+
+        product_obj=Product.objects.get(id=id)
+        product_img=ProductImages.objects.filter(image_product=product_obj.id).values()
+        product_colour=Colour.objects.filter(colour_product=product_obj.id).values()
+
+        detail_product={
+            "product_name":product_obj.product_name,
+            "product_brand":product_obj.product_brand.brand_name,
+            "product_category":product_obj.category_name,
+            "product_model":product_obj.product_model.model_name,
+            "product_quantity":product_obj.product_quantity,
+            "product_sku":product_obj.product_sku,
+            "product_price":product_obj.product_price,
+            "product_sale_price":product_obj.sale_price,
+            "product_description":product_obj.product_description,
+            "product_reviews":product_obj.product_reviews,
+            "product_reviews_count":product_obj.review_count,
+            "sale_start_date":product_obj.saleprice_startdate,
+            "sale_end_date":product_obj.saleprice_enddate,
+            "product_images":product_img,
+            "product_colour":product_colour
+        }
+
+
+
+        return Response(detail_product,status=status.HTTP_200_OK)
+

@@ -26,6 +26,7 @@ urlpatterns = [
     url(r'^create_image/$', views.CreateProductImages.as_view(), name='CreateImages'),
     url(r'^manage_images/(?P<id>\d+)/$', views.ManageProductImages.as_view(), name='EditImages'),
 
-    url(r'^get_total/$', views.GetTotal.as_view(), name='Total')
+    url(r'^get_total/$', views.GetTotal.as_view(), name='Total'),
+    url(r'^get_specific_product/(?P<id>\d+)/$', views.DetailProduct.as_view(), name='DetailProduct')
 
 ]
