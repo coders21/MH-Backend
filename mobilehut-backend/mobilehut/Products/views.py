@@ -200,6 +200,7 @@ class CreateProduct(APIView):
 
     def post(self,request):
         payload=request.data
+        print(payload)
         payload['created_date']=datetime.today().strftime('%Y-%m-%d')
         serializer = ProductSerializer(data=payload)
 
@@ -212,6 +213,10 @@ class CreateProduct(APIView):
             #now save colour 
             for x in payload['product_colors']:
                 Colour.objects.create(colour_name=x['name'],colour_product=productobj)
+            # now save models
+            for x in payload['product_models']:
+                ModelType.objects.create(model_name=x['model_name'],model_product=productobj.id)
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -229,18 +234,32 @@ class ManageProduct(APIView):
         else:
             serializer = ProductSerializer(pro)
             colour=Colour.objects.filter(colour_product=pro.id).values()
-            
+            model=ModelType.objects.filter(model_product=pro.id).values()
+
             select_colour={}
             append_color=[]
+            select_model={}
+            append_model=[]
+
             for x in range(0,len(colour)):
                 select_colour['id']=colour[x]['colour_name']
                 select_colour['name']=colour[x]['colour_name']
                 append_color.append(select_colour)
                 select_colour={}
-                
+            
+            
+            for x in range(0,len(model)):
+                select_model['model_name']=model[x]['model_name']
+                select_model['id']=model[x]['id']
+                append_model.append(select_model)
+                select_model={}
+            
+            print(append_model)
             product_data=serializer.data
             product_data['product_colors']=append_color
+            product_data['product_models']=append_model
             
+            print(product_data)
             
             return Response(product_data, status=status.HTTP_200_OK)
 
@@ -260,10 +279,21 @@ class ManageProduct(APIView):
                 del_colour=Colour.objects.get(id=int(x['id']))
                 del_colour.delete()
             
+            mdl=ModelType.objects.filter(model_product=pro.id).values()
+
+            # first delete all models of existing product and then add again
+            for x in mdl:
+                del_model=ModelType.objects.get(id=int(x['id']))
+                del_model.delete()
+            
 
             #now save colour 
             for x in payload['product_colors']:
                 Colour.objects.create(colour_name=x['name'],colour_product=pro)
+            
+            #now save model
+            for x in payload['product_models']:
+                ModelType.objects.create(model_name=x['model_name'],model_product=pro.id)
             
 
 
@@ -432,12 +462,13 @@ class DetailProduct(APIView):
         product_obj=Product.objects.get(id=id)
         product_img=ProductImages.objects.filter(image_product=product_obj.id).values()
         product_colour=Colour.objects.filter(colour_product=product_obj.id).values()
+        product_model=ModelType.objects.filter(model_product=product_obj.id).values()
+
 
         detail_product={
             "product_name":product_obj.product_name,
             "product_brand":product_obj.product_brand.brand_name,
             "product_category":product_obj.category_name,
-            "product_model":product_obj.product_model.model_name,
             "product_quantity":product_obj.product_quantity,
             "product_sku":product_obj.product_sku,
             "product_price":product_obj.product_price,
@@ -448,10 +479,19 @@ class DetailProduct(APIView):
             "sale_start_date":product_obj.saleprice_startdate,
             "sale_end_date":product_obj.saleprice_enddate,
             "product_images":product_img,
-            "product_colour":product_colour
+            "product_colour":product_colour,
+            "product_model":product_model
         }
 
 
 
         return Response(detail_product,status=status.HTTP_200_OK)
 
+
+
+class ProductList(APIView):
+
+    def post(self,request):
+        select_type=request.data['type']
+        print(select_type)
+        return Response("On Product List",status=status.HTTP_200_OK)

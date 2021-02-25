@@ -39,7 +39,7 @@ class ModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ModelType
-        fields = ['id','model_name']
+        fields = ['id','model_name','model_product']
 
     def create(self, validated_data):
         model = ModelType.objects.create(**validated_data)
@@ -71,11 +71,11 @@ class ProductSerializer(serializers.ModelSerializer):
 
     category_name = serializers.StringRelatedField()
     brand_name= serializers.StringRelatedField()
-    model_name= serializers.StringRelatedField()
+    #model_name= serializers.StringRelatedField()
 
     class Meta:
         model = Product
-        fields = ['id','category_name', 'created_date', 'brand_name','model_name','product_name','product_sku','product_description','product_quantity','product_price','sale_price','saleprice_startdate','saleprice_enddate','product_category','product_brand','product_model']
+        fields = ['id','category_name', 'created_date', 'brand_name','product_name','product_sku','product_description','product_quantity','product_price','sale_price','saleprice_startdate','saleprice_enddate','product_category','product_brand']
 
     def create(self, validated_data):
         pro = Product.objects.create(**validated_data)
@@ -91,7 +91,7 @@ class ProductSerializer(serializers.ModelSerializer):
         rep = super(ProductSerializer, self).to_representation(instance)
         rep['category_name'] = instance.product_category.category_name
         rep['brand_name'] = instance.product_brand.brand_name
-        rep['model_name'] = instance.product_model.model_name
+        #rep['model_name'] = instance.product_model.model_name
         return rep
 
 
