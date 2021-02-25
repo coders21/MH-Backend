@@ -15,3 +15,4 @@ class ProductOrder(models.Model):
     order=models.ForeignKey(Order,on_delete=models.CASCADE)
     quantity=models.IntegerField(blank=True)
     colour=models.CharField(max_length=40,default="green",blank=True)
+    modelP=models.CharField(max_length=50,default="",blank=True)

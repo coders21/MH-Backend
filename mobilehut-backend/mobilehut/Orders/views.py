@@ -141,10 +141,9 @@ class GetPOrder(APIView):
       
         for x in range(0,len(porders)):
             prod=list(Product.objects.filter(id=porders[x]['product_id']).values())
-            model=ModelType.objects.get(id=prod[0]['product_model_id'])
-            prod[0]['model_name']=model.model_name
             prod[0]['quantity']=porders[x]['quantity']
             prod[0]['colour']=porders[x]['colour']
+            prod[0]['model_name']=porders[x]['modelP']
             product_details.append(prod[0])
         
         my_dict={'products':None}
