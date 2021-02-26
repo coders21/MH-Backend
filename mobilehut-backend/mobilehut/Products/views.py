@@ -482,7 +482,8 @@ class DetailProduct(APIView):
             "saleprice_enddate":product_obj.saleprice_enddate,
             "product_images":product_img,
             "product_colour":product_colour,
-            "product_model":product_model
+            "product_model":product_model,
+            "stock":product_obj.product_quantity
         }
 
 
@@ -508,27 +509,50 @@ def getcategory(id):
     brand={}
     category_append=[]
     category={}
-    prod=Product.objects.filter(product_category=id).select_related('product_category','product_brand').values()
+    prod=Product.objects.filter(product_category=id).select_related('product_category','product_brand')
     show_product=[]
     product_data={}
+    print(prod)
+    save_val=True
+
     for prod in prod:
-                images=prod.product.productimages_set.all().order_by('id')[:2].values()
-                show_product.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"product_price":prod.product.product_price,
-                "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
-                "saleprice_enddate":prod.product.saleprice_enddate,"product_brand":prod.product_brand.brand_name,"product_category":prod.product.category_name,"product_review":prod.product.product_reviews,"review_count":prod.product.review_count,
+                images=prod.productimages_set.all().order_by('id')[:2].values()
+                show_product.append({"product_id":prod.id,"product_name":prod.product_name,"stock":prod.product_quantity,"product_price":prod.product_price,
+                "sale_price":prod.sale_price,"saleprice_startdate":prod.saleprice_startdate,
+                "saleprice_enddate":prod.saleprice_enddate,"product_brand":prod.product_brand.brand_name,"product_category":prod.category_name,"product_review":prod.product_reviews,"review_count":prod.review_count,
                 "product_images":images})
-                category['name']=prod.category.category_name
-                category['id']=prod.category.id
-                brand['name']=prod.brand.brand_name
-                brand['id']=prod.brand.id
-                category_append.append(category)
-                brand_append.append(brand)
+
+                # remove duplicate categories
+                for x in range (0,len(category_append)): # check duplicate
+                        if prod.product_category.id==category_append[x]['id']:
+                            save_val=False
+                            break
+                if (save_val):
+                    category['name']=prod.product_category.category_name
+                    category['id']=prod.product_category.id
+                    category_append.append(category)
+                    product_data["category"]=category_append
+                
                 category={}
                 brand={}
-    
-    product_data["product"]=show_product
-    product_data["category"]=category_append
-    product_data["brand"]=brand_append
+                save_val=True
+
+                # remove duplicate brands
+                for x in range (0,len(brand_append)): # check duplicate
+                        if prod.product_brand.id==brand_append[x]['id']:
+                            save_val=False
+                            break
+                if (save_val):
+                    brand['name']=prod.product_brand.brand_name
+                    brand['id']=prod.product_brand.id 
+                    brand_append.append(brand)
+                    product_data["brand"]=brand_append
+                
+                brand={}
+                save_val=True
+                product_data["product"]=show_product
+                
+                
 
     return product_data
 

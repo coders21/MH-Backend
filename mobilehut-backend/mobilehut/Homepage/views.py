@@ -70,7 +70,7 @@ class GetSaleProduct(APIView):
         for prod in prod:
             sale_product.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"product_price":prod.product.product_price,
             "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
-            "saleprice_enddate":prod.product.saleprice_enddate})
+            "saleprice_enddate":prod.product.saleprice_enddate,"stock":prod.product.product_quantity})
         
         sale_data={}
         sale_data['sale_product']=sale_product
@@ -181,7 +181,7 @@ class GetHomeData(APIView):
                             break
                 if save_val:
                     images=prod.product.productimages_set.all().order_by('id')[:2].values()
-                    sale_product.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"product_price":prod.product.product_price,
+                    sale_product.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"stock":prod.product.product_quantity,"product_price":prod.product.product_price,
                     "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
                     "saleprice_enddate":prod.product.saleprice_enddate,"product_category":prod.product.category_name,"product_reviews":prod.product.product_reviews,"review_count":prod.product.review_count,
                     "product_images":images})
@@ -206,7 +206,7 @@ class GetHomeData(APIView):
         trend_products=[]
         for prod in prod:
             images=prod.productimages_set.all().order_by('id')[:2].values()
-            trend_products.append({"product_id":prod.id,"product_name":prod.product_name,"product_category":prod.category_name,"product_price":prod.product_price,
+            trend_products.append({"product_id":prod.id,"product_name":prod.product_name,"stock":prod.product_quantity,"product_category":prod.category_name,"product_price":prod.product_price,
                 "sale_price":prod.sale_price,"saleprice_startdate":prod.saleprice_startdate,
                 "saleprice_enddate":prod.saleprice_enddate,"product_reviews":prod.product_reviews,"review_count":prod.review_count,"product_images":images})
        
@@ -216,7 +216,7 @@ class GetHomeData(APIView):
         recommended=[]
         for prod in prod:
             images=prod.product.productimages_set.all().order_by('id')[:2].values()
-            recommended.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"product_category":prod.product.category_name,"product_price":prod.product.product_price,
+            recommended.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"stock":prod.product.product_quantity,"product_category":prod.product.category_name,"product_price":prod.product.product_price,
                 "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
                 "saleprice_enddate":prod.product.saleprice_enddate,"product_reviews":prod.product.product_reviews,"review_count":prod.product.review_count,"product_images":images})
         homepagedata['recommended_product']=recommended
@@ -226,7 +226,7 @@ class GetHomeData(APIView):
         new_arrival_product=[]
         for prod in prod:
             images=prod.productimages_set.all().order_by('id')[:2].values()
-            new_arrival_product.append({"product_id":prod.id,"product_name":prod.product_name,"product_category":prod.category_name,"product_price":prod.product_price,
+            new_arrival_product.append({"product_id":prod.id,"product_name":prod.product_name,"stock":prod.product_quantity,"product_category":prod.category_name,"product_price":prod.product_price,
                 "sale_price":prod.sale_price,"saleprice_startdate":prod.saleprice_startdate,"created_date":prod.created_date,
                 "saleprice_enddate":prod.saleprice_enddate,"product_reviews":prod.product_reviews,"review_count":prod.review_count,"product_images":images})
             
