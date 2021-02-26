@@ -464,7 +464,7 @@ class DetailProduct(APIView):
         product_obj=Product.objects.get(id=id)
         product_img=ProductImages.objects.filter(image_product=product_obj.id).values()
         product_colour=Colour.objects.filter(colour_product=product_obj.id).values()
-        product_model=ModelType.objects.filter(model_product=product_obj.id).values()
+        product_model=ProductModel.objects.filter(model_product=product_obj.id).values()
 
 
         detail_product={
