@@ -39,7 +39,7 @@ class ModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ModelType
-        fields = ['id','model_name','model_product']
+        fields = ['id','model_name']
 
     def create(self, validated_data):
         model = ModelType.objects.create(**validated_data)

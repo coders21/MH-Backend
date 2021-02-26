@@ -8,6 +8,7 @@ class Brand(models.Model):
     brand_name=models.CharField(max_length=50,blank=True)
     brand_image=models.ImageField(upload_to="brand_images",null=True,blank=True)
 
+
 class Product(models.Model):
     product_name=models.CharField(max_length=300,blank=True)
     product_price=models.IntegerField(blank=True)
@@ -28,7 +29,12 @@ class Product(models.Model):
 
 class ModelType(models.Model):
     model_name=models.CharField(max_length=150,blank=True)
+   
+
+class ProductModel(models.Model):
+    modelid=models.ForeignKey(ModelType,null=True,on_delete=models.CASCADE)
     model_product=models.CharField(max_length=150, blank=True)
+    model_name=models.CharField(max_length=130,blank=True)
 
 class Colour(models.Model):
     colour_name=models.CharField(max_length=20,blank=True)

@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializer import ProductSerializer,CategorySerializer,BrandSerializer,ModelSerializer,ColourSerializer,ProductImgSerializer
-from .models import Product,Category,Brand,ModelType,Colour,ProductImages
+from .models import Product,Category,Brand,ModelType,Colour,ProductImages,ProductModel
 from rest_framework.permissions import IsAuthenticated
 from Orders.models import Order
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -200,7 +200,6 @@ class CreateProduct(APIView):
 
     def post(self,request):
         payload=request.data
-        print(payload)
         payload['created_date']=datetime.today().strftime('%Y-%m-%d')
         serializer = ProductSerializer(data=payload)
 
@@ -215,7 +214,8 @@ class CreateProduct(APIView):
                 Colour.objects.create(colour_name=x['name'],colour_product=productobj)
             # now save models
             for x in payload['product_models']:
-                ModelType.objects.create(model_name=x['model_name'],model_product=productobj.id)
+                pmodel=ModelType.objects.get(id=x['id'])
+                ProductModel.objects.create(modelid=pmodel,model_product=productobj,model_name=x['model_name'])
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -234,7 +234,7 @@ class ManageProduct(APIView):
         else:
             serializer = ProductSerializer(pro)
             colour=Colour.objects.filter(colour_product=pro.id).values()
-            model=ModelType.objects.filter(model_product=pro.id).values()
+            model=ProductModel.objects.filter(model_product=pro.id).values()
 
             select_colour={}
             append_color=[]
@@ -254,7 +254,7 @@ class ManageProduct(APIView):
                 append_model.append(select_model)
                 select_model={}
             
-            print(append_model)
+            
             product_data=serializer.data
             product_data['product_colors']=append_color
             product_data['product_models']=append_model
@@ -279,12 +279,11 @@ class ManageProduct(APIView):
                 del_colour=Colour.objects.get(id=int(x['id']))
                 del_colour.delete()
             
-            mdl=ModelType.objects.filter(model_product=pro.id).values()
-
-            # first delete all models of existing product and then add again
-            for x in mdl:
-                del_model=ModelType.objects.get(id=int(x['id']))
-                del_model.delete()
+            try:
+                mdl=ProductModel.objects.filter(model_product=pro.id)
+                mdl.delete()
+            except:
+                pass
             
 
             #now save colour 
@@ -292,10 +291,13 @@ class ManageProduct(APIView):
                 Colour.objects.create(colour_name=x['name'],colour_product=pro)
             
             #now save model
-            for x in payload['product_models']:
-                ModelType.objects.create(model_name=x['model_name'],model_product=pro.id)
-            
 
+            for x in payload['product_models']:
+                try:
+                    pmodel=ModelType.objects.get(model_name=x['model_name'])
+                    ProductModel.objects.create(modelid=pmodel,model_name=x['model_name'],model_product=pro.id)
+                except:
+                    pass
 
             if serializer.is_valid():
                 serializer.save()
@@ -472,12 +474,12 @@ class DetailProduct(APIView):
             "product_quantity":product_obj.product_quantity,
             "product_sku":product_obj.product_sku,
             "product_price":product_obj.product_price,
-            "product_sale_price":product_obj.sale_price,
+            "sale_price":product_obj.sale_price,
             "product_description":product_obj.product_description,
             "product_reviews":product_obj.product_reviews,
-            "product_reviews_count":product_obj.review_count,
-            "sale_start_date":product_obj.saleprice_startdate,
-            "sale_end_date":product_obj.saleprice_enddate,
+            "review_count":product_obj.review_count,
+            "saleprice_startdate":product_obj.saleprice_startdate,
+            "saleprice_enddate":product_obj.saleprice_enddate,
             "product_images":product_img,
             "product_colour":product_colour,
             "product_model":product_model
@@ -493,5 +495,40 @@ class ProductList(APIView):
 
     def post(self,request):
         select_type=request.data['type']
-        print(select_type)
-        return Response("On Product List",status=status.HTTP_200_OK)
+        show_data=None
+
+        if (select_type=="category"):
+            show_data=getcategory(request.data['id'])
+
+        return Response(show_data,status=status.HTTP_200_OK)
+
+
+def getcategory(id):
+    brand_append=[]
+    brand={}
+    category_append=[]
+    category={}
+    prod=Product.objects.filter(product_category=id).select_related('product_category','product_brand').values()
+    show_product=[]
+    product_data={}
+    for prod in prod:
+                images=prod.product.productimages_set.all().order_by('id')[:2].values()
+                show_product.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"product_price":prod.product.product_price,
+                "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
+                "saleprice_enddate":prod.product.saleprice_enddate,"product_brand":prod.product_brand.brand_name,"product_category":prod.product.category_name,"product_review":prod.product.product_reviews,"review_count":prod.product.review_count,
+                "product_images":images})
+                category['name']=prod.category.category_name
+                category['id']=prod.category.id
+                brand['name']=prod.brand.brand_name
+                brand['id']=prod.brand.id
+                category_append.append(category)
+                brand_append.append(brand)
+                category={}
+                brand={}
+    
+    product_data["product"]=show_product
+    product_data["category"]=category_append
+    product_data["brand"]=brand_append
+
+    return product_data
+

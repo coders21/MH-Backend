@@ -87,25 +87,33 @@ class CreateProductSale(APIView):
      def post(self,request):
 
         payload=request.data
-        try:
-            ps=ProductSale.objects.filter(product=payload['product'])
-            
-            if len(ps)>0:
-                return Response("Product already exists",status=status.HTTP_200_OK)
-            else:
-                payload=request.data
-                serializer = ProductSaleSerializer(data=payload)
-                if serializer.is_valid():
+       
+        prod=list(ProductSale.objects.filter(sale=payload['sale']).prefetch_related('product'))
+       
+        sale_product=True
+    
+        for x in range(0,len(prod)):
+            print(prod[x].product.id,"",payload['product'])
+            if prod[x].product.id == int(payload['product']):
+                sale_product=False
+                break
+        
+        if (sale_product):
+            payload=request.data
+            serializer = ProductSaleSerializer(data=payload)
+            if serializer.is_valid():
                     serializer.save()
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            pass
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)                             
+        else:
+            return Response ("product already exist",status=status.HTTP_200_OK)
+            
 
 
 class ManageProductSale(APIView):
 
     def delete (self,request,id):
+        print(request.data)
         del_sale=ProductSale.objects.get(product=id)
         del_sale.delete()
         return Response ("Product Removed",status=status.HTTP_200_OK)
@@ -175,7 +183,7 @@ class GetHomeData(APIView):
                     images=prod.product.productimages_set.all().order_by('id')[:2].values()
                     sale_product.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"product_price":prod.product.product_price,
                     "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
-                    "saleprice_enddate":prod.product.saleprice_enddate,"category_name":prod.product.category_name,"product_review":prod.product.product_reviews,"review_count":prod.product.review_count,
+                    "saleprice_enddate":prod.product.saleprice_enddate,"product_category":prod.product.category_name,"product_reviews":prod.product.product_reviews,"review_count":prod.product.review_count,
                     "product_images":images})
                 save_val=True
             homepagedata['sale']={
@@ -198,9 +206,9 @@ class GetHomeData(APIView):
         trend_products=[]
         for prod in prod:
             images=prod.productimages_set.all().order_by('id')[:2].values()
-            trend_products.append({"product_id":prod.id,"product_name":prod.product_name,"category_name":prod.category_name,"product_price":prod.product_price,
+            trend_products.append({"product_id":prod.id,"product_name":prod.product_name,"product_category":prod.category_name,"product_price":prod.product_price,
                 "sale_price":prod.sale_price,"saleprice_startdate":prod.saleprice_startdate,
-                "saleprice_enddate":prod.saleprice_enddate,"product_review":prod.product_reviews,"review_count":prod.review_count,"product_images":images})
+                "saleprice_enddate":prod.saleprice_enddate,"product_reviews":prod.product_reviews,"review_count":prod.review_count,"product_images":images})
        
         homepagedata['trending_products']=trend_products
 
@@ -208,9 +216,9 @@ class GetHomeData(APIView):
         recommended=[]
         for prod in prod:
             images=prod.product.productimages_set.all().order_by('id')[:2].values()
-            recommended.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"category_name":prod.product.category_name,"product_price":prod.product.product_price,
+            recommended.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"product_category":prod.product.category_name,"product_price":prod.product.product_price,
                 "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
-                "saleprice_enddate":prod.product.saleprice_enddate,"product_review":prod.product.product_reviews,"review_count":prod.product.review_count,"product_images":images})
+                "saleprice_enddate":prod.product.saleprice_enddate,"product_reviews":prod.product.product_reviews,"review_count":prod.product.review_count,"product_images":images})
         homepagedata['recommended_product']=recommended
 
         
@@ -218,9 +226,9 @@ class GetHomeData(APIView):
         new_arrival_product=[]
         for prod in prod:
             images=prod.productimages_set.all().order_by('id')[:2].values()
-            new_arrival_product.append({"product_id":prod.id,"product_name":prod.product_name,"category_name":prod.category_name,"product_price":prod.product_price,
+            new_arrival_product.append({"product_id":prod.id,"product_name":prod.product_name,"product_category":prod.category_name,"product_price":prod.product_price,
                 "sale_price":prod.sale_price,"saleprice_startdate":prod.saleprice_startdate,"created_date":prod.created_date,
-                "saleprice_enddate":prod.saleprice_enddate,"product_review":prod.product_reviews,"review_count":prod.review_count,"product_images":images})
+                "saleprice_enddate":prod.saleprice_enddate,"product_reviews":prod.product_reviews,"review_count":prod.review_count,"product_images":images})
             
        
         select_new_arrival=[]
