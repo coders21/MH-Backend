@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializer import ProductSerializer,CategorySerializer,BrandSerializer,ModelSerializer,ColourSerializer,ProductImgSerializer
 from .models import Product,Category,Brand,ModelType,Colour,ProductImages,ProductModel
+from .ProductList import getcategoryProducts,getbrandProducts,getunder99Products
 from rest_framework.permissions import IsAuthenticated
 from Orders.models import Order
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -498,61 +499,15 @@ class ProductList(APIView):
         select_type=request.data['type']
         show_data=None
 
-        if (select_type=="category"):
-            show_data=getcategory(request.data['id'])
-
+        if (select_type=="category"): # shows all products of specific category
+            show_data=getcategoryProducts(request.data['id'])
+        elif (select_type=="brand"): # shows all products of specific brand
+            show_data=getbrandProducts(request.data['id'])
+        elif (select_type=="under99"): # shows all products of under 99 rs
+            show_data=getunder99Products()
+        
         return Response(show_data,status=status.HTTP_200_OK)
 
 
-def getcategory(id):
-    brand_append=[]
-    brand={}
-    category_append=[]
-    category={}
-    prod=Product.objects.filter(product_category=id).select_related('product_category','product_brand')
-    show_product=[]
-    product_data={}
-    print(prod)
-    save_val=True
 
-    for prod in prod:
-                images=prod.productimages_set.all().order_by('id')[:2].values()
-                show_product.append({"product_id":prod.id,"product_name":prod.product_name,"stock":prod.product_quantity,"product_price":prod.product_price,
-                "sale_price":prod.sale_price,"saleprice_startdate":prod.saleprice_startdate,
-                "saleprice_enddate":prod.saleprice_enddate,"product_brand":prod.product_brand.brand_name,"product_category":prod.category_name,"product_review":prod.product_reviews,"review_count":prod.review_count,
-                "product_images":images})
-
-                # remove duplicate categories
-                for x in range (0,len(category_append)): # check duplicate
-                        if prod.product_category.id==category_append[x]['id']:
-                            save_val=False
-                            break
-                if (save_val):
-                    category['name']=prod.product_category.category_name
-                    category['id']=prod.product_category.id
-                    category_append.append(category)
-                    product_data["category"]=category_append
-                
-                category={}
-                brand={}
-                save_val=True
-
-                # remove duplicate brands
-                for x in range (0,len(brand_append)): # check duplicate
-                        if prod.product_brand.id==brand_append[x]['id']:
-                            save_val=False
-                            break
-                if (save_val):
-                    brand['name']=prod.product_brand.brand_name
-                    brand['id']=prod.product_brand.id 
-                    brand_append.append(brand)
-                    product_data["brand"]=brand_append
-                
-                brand={}
-                save_val=True
-                product_data["product"]=show_product
-                
-                
-
-    return product_data
 
