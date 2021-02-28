@@ -11,6 +11,7 @@ from django.conf import settings
 from django.db import connection, reset_queries
 from datetime import datetime
 import random
+from django.db.models import Q
 
 class CreateCarousel(generics.ListCreateAPIView):
     parser_classes = (MultiPartParser, FormParser)
@@ -111,11 +112,14 @@ class CreateProductSale(APIView):
 
 
 class ManageProductSale(APIView):
-
-    def delete (self,request,id):
-        print(request.data)
-        del_sale=ProductSale.objects.get(product=id)
-        del_sale.delete()
+    
+    # Removing product from sale
+    def post (self,request,id):
+        
+        payload=request.data
+        ps=ProductSale.objects.filter(sale=payload['sale']).filter(product=id)
+        ps.delete()
+        
         return Response ("Product Removed",status=status.HTTP_200_OK)
     
 
@@ -125,9 +129,7 @@ class CreateRecommendedProduct(APIView):
          return Response([RecommendedProductSerializer(dat).data for dat in RecommendedProduct.objects.all()])
     
     def post(self,request):
-        payload=request.data
-        
-        
+        payload=request.data    
         try:
             rp=RecommendedProduct.objects.filter(product=payload['product'])
             
