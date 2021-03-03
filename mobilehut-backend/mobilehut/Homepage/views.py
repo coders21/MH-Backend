@@ -9,7 +9,7 @@ from .serializer import CarouselSerializer,OneBannerSerializer,ThreeBannerSerial
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.conf import settings
 from django.db import connection, reset_queries
-from datetime import datetime
+from datetime import datetime,timedelta,date
 import random
 from django.db.models import Q
 
@@ -94,7 +94,6 @@ class CreateProductSale(APIView):
         sale_product=True
     
         for x in range(0,len(prod)):
-            print(prod[x].product.id,"",payload['product'])
             if prod[x].product.id == int(payload['product']):
                 sale_product=False
                 break
@@ -237,7 +236,9 @@ class GetHomeData(APIView):
         
         for  x in range(0,len(new_arrival_product)):
             mydate=new_arrival_product[x]['created_date']
-            if mydate.strftime("%m")==datetime.today().strftime("%m"):
+            mydate_limit = mydate + timedelta(days=+14)
+            
+            if date.today() < mydate_limit:
                select_new_arrival.append(new_arrival_product[x])
         
         if len(select_new_arrival)>7:

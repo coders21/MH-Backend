@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializer import ProductSerializer,CategorySerializer,BrandSerializer,ModelSerializer,ColourSerializer,ProductImgSerializer
 from .models import Product,Category,Brand,ModelType,Colour,ProductImages,ProductModel
-from .ProductList import getcategoryProducts,getbrandProducts,getunder99Products
+from .ProductList import getcategoryProducts,getbrandProducts,getunder99Products,getclearanceProducts,getbuyerpickProducts,getsaleProducts,getnewarrivalProducts,gettrendingProducts,getrecommendedProducts
 from rest_framework.permissions import IsAuthenticated
 from Orders.models import Order
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -505,7 +505,18 @@ class ProductList(APIView):
             show_data=getbrandProducts(request.data['id'])
         elif (select_type=="under99"): # shows all products of under 99 rs
             show_data=getunder99Products()
-        
+        elif (select_type=="clearance"):
+            show_data=getclearanceProducts()
+        elif (select_type=="buyer_picks"):
+            show_data=getbuyerpickProducts()
+        elif (select_type=="sale"):
+            show_data=getsaleProducts()
+        elif (select_type=="new_arrival"):
+            show_data=getnewarrivalProducts()
+        elif (select_type=="trending_product"):
+            show_data=gettrendingProducts()
+        elif (select_type=="recommended"):
+            show_data=getrecommendedProducts()
         return Response(show_data,status=status.HTTP_200_OK)
 
 
