@@ -81,7 +81,7 @@ class AccountDetail(APIView):
 
         index=0
         for order in order:
-            order_details.append({"ordernumber":order.id,"orderdate":order.order_date,"orderstatus":order.order_status})
+            order_details.append({"ordernumber":order.id,"orderdate":order.order_date,"orderstatus":order.order_status,"ordertracking":order.order_tracking,"updateddate":order.update_date})
             for order in order.productorder_set.all():
                 product_details.append({"name":order.product.product_name,"quantity":order.quantity,"model":order.modelP,"colour":order.colour})
             order_details[index]['product']=product_details
