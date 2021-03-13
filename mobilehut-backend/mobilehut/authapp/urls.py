@@ -15,5 +15,6 @@ urlpatterns=[
     path('jwt/refresh/', TokenRefreshView.as_view(),name='token_refresh'),
     path('create_user/', views.CreateUser.as_view(), name='CreateUser'),
     path('manage_user/<int:id>/', views.ManageUser.as_view(), name='ManageUser'),
+    path('account_detail/', views.AccountDetail.as_view(), name='AccountDetail'),
     
 ]
