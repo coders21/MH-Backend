@@ -1,14 +1,15 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializer import UserSerializer,UserUpdateSerializer,CustomTokenObtainPairSerializer
+from .serializer import UserSerializer,UserUpdateSerializer,CustomTokenObtainPairSerializer,ChangePasswordSerializer
 from .models import User
 from Orders.models import Order,ProductOrder
+from django.contrib.auth import authenticate,login
 from rest_framework import status
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
 )
-# Create your views here.
+
 
 class CreateUser(APIView):
 
@@ -28,8 +29,9 @@ class CreateUser(APIView):
 
 class ManageUser(APIView):
 
-    def get(self, request, id):
+    def get(self, request,id):
 
+       
         try:
             user = User.objects.get(id=id)
         except (KeyError, User.DoesNotExist):
@@ -38,8 +40,9 @@ class ManageUser(APIView):
             serializer = UserUpdateSerializer(user)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def put(self, request, id):
+    def put(self, request,id):
 
+        
         try:
             user = User.objects.get(id=id)
         except (KeyError, User.DoesNotExist):
@@ -88,15 +91,68 @@ class AccountDetail(APIView):
             product_details=[]
             index=index+1
         
-        user_address=[]
-        user_address.append({"phonenumber":user.phonenumber,"address":user.address,"city":user.city,"province":user.province})
-        
-        user_account=[]
-        user_account.append({"name":user.username,"email":user.email})
 
         account_details={}
         account_details['order']=order_details
-        account_details['address']=user_address
-        account_details['account']=user_account
+        account_details['address']={"phonenumber":user.phonenumber,"address":user.address,"city":user.city,"province":user.province}
+        account_details['account']={"name":user.username,"email":user.email,"id":user.id}
 
         return Response(account_details,status=status.HTTP_200_OK)
+
+
+class UpdatePassword(APIView):
+
+
+    def get_object(self,request, email,password):
+        my_user=User.objects.get(email=email)
+        user = User.objects.get(email=my_user.email)
+        login(request,user,backend='django.contrib.auth.backends.ModelBackend')
+        return self.request.user
+
+    def put(self, request, *args, **kwargs):
+        email=request.data.get('email')
+        password=request.data.get('old_password')
+        self.object = self.get_object(request,email,password)
+        serializer = ChangePasswordSerializer(data=request.data)
+
+        if serializer.is_valid():
+            # Check old password
+            old_password = serializer.data.get("old_password")
+            if not self.object.check_password(old_password):
+                return Response({"old_password": ["Wrong password."]},
+                                status=status.HTTP_400_BAD_REQUEST)
+            # set_password also hashes the password that the user will get
+            self.object.set_password(serializer.data.get("new_password"))
+            self.object.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CreateSocial(APIView):
+
+    def post(self,request):
+
+        email=request.data.get('email')
+        
+        user=User.objects.filter(email=email).values()
+
+        if len(user)>0: # if user is already there retrieve id
+            user_serializer={
+                "id":user[0]['id'],
+                "email":user[0]['email'],
+                }
+        else:
+            user=User.objects.create(email=email)
+            user.save()
+            user_serializer={
+                    "id":user.id,
+                    "email":user.email,
+            }
+
+             
+        
+        return Response(user_serializer,status=status.HTTP_200_OK)
+          
+
+

@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 import datetime
 from datetime import timedelta
+# from django.apps import config
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     'rest_framework',
     'authapp.apps.AuthappConfig',
     'Products.apps.ProductsConfig',
@@ -47,7 +49,12 @@ INSTALLED_APPS = [
     'Homepage.apps.HomepageConfig',
     'corsheaders',  # new addition
     'rest_framework.authtoken',
+    'djoser',
 ]
+
+SITE_ID=2
+
+
 
 AUTH_USER_MODEL='authapp.User'
 
@@ -127,6 +134,18 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
 
+# DOMAIN = config('localhost:8000') #localhost:8000
+# SITE_NAME = config('localhost') #Example
+DJOSER = {
+
+    'PASSWORD_RESET_CONFIRM_URL': 'pages/password/reset/confirm/{uid}/{token}',
+    "PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND": True,
+    'SERIALIZERS': {},
+
+}
+
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -160,6 +179,15 @@ USE_L10N = True
 
 USE_TZ = True
 
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'storem2121@gmail.com'
+EMAIL_HOST_PASSWORD = 'welcome@2019_'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+ACCOUNT_EMAIL_REQUIRED = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/

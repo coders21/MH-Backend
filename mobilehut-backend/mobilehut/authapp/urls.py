@@ -14,7 +14,8 @@ urlpatterns=[
     path('jwt/', views.CustomTokenObtainPairView.as_view(),name='token_obtain_pair'),
     path('jwt/refresh/', TokenRefreshView.as_view(),name='token_refresh'),
     path('create_user/', views.CreateUser.as_view(), name='CreateUser'),
-    path('manage_user/<int:id>/', views.ManageUser.as_view(), name='ManageUser'),
+    path('manage_user/<id>/', views.ManageUser.as_view(), name='ManageUser'),
     path('account_detail/', views.AccountDetail.as_view(), name='AccountDetail'),
-    
+    path('change_password/', views.UpdatePassword.as_view(), name='UpdatePassword'),
+    path('create_user_social/',views.CreateSocial.as_view(), name='SocialUser')
 ]

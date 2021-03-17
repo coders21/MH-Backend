@@ -1,4 +1,5 @@
 from rest_framework.serializers import ModelSerializer
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -50,3 +51,19 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer): # to add usern
         data.update({'id': self.user.id})
         # and everything else you want to send in the response
         return data
+
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    model = User
+
+    """
+    Serializer for password change endpoint.
+    """
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
+
+    def validate_new_password(self, value):
+        validate_password(value)
+        return value
