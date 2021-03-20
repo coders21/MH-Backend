@@ -27,7 +27,7 @@ class CreateOrder(APIView):
 
 class GetOrder(APIView):
 
-    permission_classes = [IsAuthenticated]
+    
 
     def post(self,request):
         payload=request.data
@@ -51,7 +51,7 @@ class GetOrder(APIView):
 
 class ManageOrder(APIView):
 
-    permission_classes = [IsAuthenticated]
+   
 
     def get(self, request, id):
 

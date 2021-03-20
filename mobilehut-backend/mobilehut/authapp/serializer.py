@@ -47,8 +47,14 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer): # to add usern
         # The default result (access/refresh tokens)
         data = super(CustomTokenObtainPairSerializer, self).validate(attrs)
         # Custom data you want to include
-        data.update({'user': self.user.username})
-        data.update({'id': self.user.id})
+        if (self.user.is_superuser):
+            data.update({'email': self.user.email})
+            data.update({'userid': self.user.id})
+        else:
+            data.update({'email': self.user.email})
+            data.update({'userid': self.user.id})
+            del data['refresh']
+            del data['access']
         # and everything else you want to send in the response
         return data
 

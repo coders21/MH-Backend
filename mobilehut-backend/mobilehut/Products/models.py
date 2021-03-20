@@ -1,5 +1,5 @@
 from django.db import models
-
+from authapp.models import User
 
 class Category(models.Model):
     category_name=models.CharField(max_length=50,blank=True)
@@ -44,3 +44,15 @@ class Colour(models.Model):
 class ProductImages(models.Model):
     image=models.ImageField(upload_to='product_images',null=True,blank=True)
     image_product=models.ForeignKey(Product,on_delete=models.CASCADE)
+
+
+
+class ProductReviews(models.Model):
+    product=models.ForeignKey(Product,on_delete=models.CASCADE)
+    user=models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
+    title=models.CharField(max_length=30,null=True,blank=True)
+    description=models.CharField(max_length=200,null=True,blank=True)
+    stars=models.FloatField(null=True,blank=True)
+    review_image=models.ImageField(upload_to='review_images',null=True,blank=True)
+    status=models.BooleanField(default=False,blank=True,null=True)
+    

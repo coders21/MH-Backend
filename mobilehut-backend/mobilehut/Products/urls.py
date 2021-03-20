@@ -28,6 +28,10 @@ urlpatterns = [
 
     url(r'^get_total/$', views.GetTotal.as_view(), name='Total'),
     url(r'^get_specific_product/(?P<id>\d+)/$', views.DetailProduct.as_view(), name='DetailProduct'),
-    url(r'^get_product_list/$', views.ProductList.as_view(), name="ProductList")
+    url(r'^get_product_list/$', views.ProductList.as_view(), name="ProductList"),
+
+    url(r'^admin/reviews/$',views.GetReview.as_view(),name='AdminReview'), #allget,#put
+    url(r'^admin/edit/reviews/(?P<id>\d+)/$',views.EditReview.as_view(),name='AdminReview'), #allget,#put
+    url(r'^site/reviews/$',views.SiteReview.as_view(),name='SiteReview') #statusget,post#
 
 ]

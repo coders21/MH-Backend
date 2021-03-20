@@ -8,6 +8,7 @@ class Order(models.Model):
     order_status=models.CharField(max_length=20,blank=True)
     order_returndate=models.DateField(blank=True,null=True)
     order_tracking=models.CharField(max_length=30,null=True,blank=True)
+    shipping_provider=models.CharField(max_length=20,null=True,blank=True)
     update_date=models.DateField(blank=True,default='2021-01-26')
     user=models.ForeignKey(User,on_delete=models.CASCADE)
 

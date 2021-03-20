@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializer import ProductSerializer,CategorySerializer,BrandSerializer,ModelSerializer,ColourSerializer,ProductImgSerializer
-from .models import Product,Category,Brand,ModelType,Colour,ProductImages,ProductModel
+from .serializer import ProductSerializer,CategorySerializer,BrandSerializer,ModelSerializer,ColourSerializer,ProductImgSerializer,ProductReviewSerializer
+from .models import Product,Category,Brand,ModelType,Colour,ProductImages,ProductModel,ProductReviews
 from .ProductList import getcategoryProducts,getbrandProducts,getunder99Products,getclearanceProducts,getbuyerpickProducts,getsaleProducts,getnewarrivalProducts,gettrendingProducts,getrecommendedProducts
 from rest_framework.permissions import IsAuthenticated
 from Orders.models import Order
@@ -427,6 +427,63 @@ class ManageProductImages(APIView):
             return Response("Product Deleted",status=status.HTTP_200_OK)
 
 
+class GetReview(APIView): #admin
+    
+    def get(self,request):
+        return Response([ProductReviewSerializer(dat).data for dat in ProductReviews.objects.filter(status=False)])
+
+class EditReview(APIView): #admin
+
+    def get(self, request, id):
+
+        try:
+            pr = ProductReviews.objects.filter(id=int(id)).values()
+        except (KeyError, ProductReviews.DoesNotExist):
+            return Response('Reviews Not Found', status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(pr, status=status.HTTP_200_OK)
+
+    def put(self,request,id):
+        try:
+            pr = ProductReviews.objects.get(id=int(id))
+        except (KeyError, ProductReviews.DoesNotExist):
+            return Response('Review Not Found', status.HTTP_404_NOT_FOUND)
+        else:
+            payload = request.data
+            serializer = ProductReviewSerializer(pr,data=payload)
+
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self,request):
+        try:
+            pr = ProductReviews.objects.get(id=int(id))
+        except (KeyError, ProductReviews.DoesNotExist):
+            return Response('Review Not Found', status.HTTP_404_NOT_FOUND)
+        else:
+            pr.delete()
+
+            return Response("Product Deleted",status=status.HTTP_200_OK)
+
+
+class SiteReview(APIView): #user
+
+    def get(self,request):
+        pr=ProductReviews.objects.filter(status=True).values()     
+        return Response(pr,status=status.HTTP_200_OK)
+    
+    def post(self,request):
+        payload=request.data
+        serializer=ProductReviewSerializer(data=payload)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
 # Get Total Brands,Models,Categories
 class GetTotal(APIView):
 
@@ -466,31 +523,31 @@ class DetailProduct(APIView):
         product_img=ProductImages.objects.filter(image_product=product_obj.id).values()
         product_colour=Colour.objects.filter(colour_product=product_obj.id).values()
         product_model=ProductModel.objects.filter(model_product=product_obj.id).values()
-
-
+        product_reviews=ProductReviews.objects.filter(product=product_obj.id)
+        rating=[ProductReviewSerializer(dat).data for dat in ProductReviews.objects.filter(product=product_obj.id)]
+        
         detail_product={
-            "product_name":product_obj.product_name,
-            "product_brand":product_obj.product_brand.brand_name,
-            "product_category":product_obj.category_name,
-            "product_quantity":product_obj.product_quantity,
-            "product_sku":product_obj.product_sku,
-            "product_price":product_obj.product_price,
-            "sale_price":product_obj.sale_price,
-            "product_description":product_obj.product_description,
-            "product_reviews":product_obj.product_reviews,
-            "review_count":product_obj.review_count,
-            "saleprice_startdate":product_obj.saleprice_startdate,
-            "saleprice_enddate":product_obj.saleprice_enddate,
-            "product_images":product_img,
-            "product_colour":product_colour,
-            "product_model":product_model,
-            "stock":product_obj.product_quantity
+                "product_name":product_obj.product_name,
+                "product_brand":product_obj.product_brand.brand_name,
+                "product_category":product_obj.category_name,
+                "product_quantity":product_obj.product_quantity,
+                "product_sku":product_obj.product_sku,
+                "product_price":product_obj.product_price,
+                "sale_price":product_obj.sale_price,
+                "product_description":product_obj.product_description,
+                "product_reviews":product_obj.product_reviews,
+                "review_count":product_obj.review_count,
+                "saleprice_startdate":product_obj.saleprice_startdate,
+                "saleprice_enddate":product_obj.saleprice_enddate,
+                "product_images":product_img,
+                "product_colour":product_colour,
+                "product_model":product_model,
+                "stock":product_obj.product_quantity,
+                "ratings":rating
         }
-
-
+       
 
         return Response(detail_product,status=status.HTTP_200_OK)
-
 
 
 class ProductList(APIView):

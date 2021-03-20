@@ -22,7 +22,7 @@ class OrderUpdateSerializer(serializers.ModelSerializer):  # status update
 
     class Meta:
         model = Order
-        fields = ['order_status','update_date']
+        fields = ['order_status','update_date','shipping_provider','order_tracking']
 
     def create(self, validated_data):
         order_check = Order.objects.create(**validated_data)
