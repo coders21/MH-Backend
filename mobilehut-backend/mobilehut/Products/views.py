@@ -76,7 +76,7 @@ class ManageCategory(APIView):
 
 class CreateBrand(APIView):
 
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser)
     def get(self,request):
         return Response([BrandSerializer(dat).data for dat in Brand.objects.all()])
