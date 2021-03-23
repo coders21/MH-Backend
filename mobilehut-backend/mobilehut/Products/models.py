@@ -48,7 +48,7 @@ class ProductImages(models.Model):
 
 
 class ProductReviews(models.Model):
-    product=models.ForeignKey(Product,on_delete=models.CASCADE)
+    product=models.ForeignKey(Product,on_delete=models.CASCADE,null=True,blank=True)
     user=models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
     title=models.CharField(max_length=30,null=True,blank=True)
     description=models.CharField(max_length=200,null=True,blank=True)

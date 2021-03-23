@@ -457,7 +457,7 @@ class EditReview(APIView): #admin
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
-    def delete(self,request):
+    def delete(self,request,id):
         try:
             pr = ProductReviews.objects.get(id=int(id))
         except (KeyError, ProductReviews.DoesNotExist):
@@ -524,7 +524,7 @@ class DetailProduct(APIView):
         product_colour=Colour.objects.filter(colour_product=product_obj.id).values()
         product_model=ProductModel.objects.filter(model_product=product_obj.id).values()
         product_reviews=ProductReviews.objects.filter(product=product_obj.id)
-        rating=[ProductReviewSerializer(dat).data for dat in ProductReviews.objects.filter(product=product_obj.id)]
+        rating=[ProductReviewSerializer(dat).data for dat in ProductReviews.objects.filter(product=product_obj.id).filter(status=True)]
         
         detail_product={
                 "product_name":product_obj.product_name,
