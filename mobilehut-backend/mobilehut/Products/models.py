@@ -1,5 +1,6 @@
 from django.db import models
 from authapp.models import User
+from datetime import date
 
 class Category(models.Model):
     category_name=models.CharField(max_length=50,blank=True)
@@ -49,10 +50,10 @@ class ProductImages(models.Model):
 
 class ProductReviews(models.Model):
     product=models.ForeignKey(Product,on_delete=models.CASCADE,null=True,blank=True)
-    user=models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
     title=models.CharField(max_length=30,null=True,blank=True)
     description=models.CharField(max_length=200,null=True,blank=True)
     stars=models.FloatField(null=True,blank=True)
     review_image=models.ImageField(upload_to='review_images',null=True,blank=True)
     status=models.BooleanField(default=False,blank=True,null=True)
-    
+    date=models.DateField(default=date.today,null=True,blank=True)
+    customername=models.CharField(max_length=50,null=True,blank=True)

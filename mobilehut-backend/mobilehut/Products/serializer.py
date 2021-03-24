@@ -114,11 +114,10 @@ class ProductImgSerializer(serializers.ModelSerializer):
 
 class ProductReviewSerializer(serializers.ModelSerializer):
 
-    customername = serializers.CharField(source='user.username', read_only=True)
 
     class Meta:
         model = ProductReviews
-        fields =('id','customername','product','title','description','stars','review_image','status')
+        fields =('id','date','customername','product','title','description','stars','review_image','status')
 
     def create(self, validated_data):
         pr = ProductReviews.objects.create(**validated_data)
