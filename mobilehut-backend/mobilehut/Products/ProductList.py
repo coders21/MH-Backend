@@ -3,7 +3,7 @@ from Orders.models import ProductOrder
 from Homepage.models import Sale,ProductSale,RecommendedProduct
 import random
 from datetime import datetime,date,timedelta
-
+from Products.models import ProductReviews
 def getcategoryProducts(id):
    
     prod=Product.objects.filter(product_category=id).select_related('product_category','product_brand')
@@ -107,10 +107,14 @@ def productformatSecond(prod):
                             save_val=False
                             break
                 if save_val:
+                    pr=None
+                    product_reviews=0
+                    pr=ProductReviews.objects.filter(product=prod.product.id).values()
+                    product_reviews=CalculateRating(pr)
                     images=prod.product.productimages_set.all().order_by('id')[:2].values()
                     sale_product.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"stock":prod.product.product_quantity,"product_price":prod.product.product_price,
                     "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
-                    "saleprice_enddate":prod.product.saleprice_enddate,"product_category":prod.product.category_name,"product_reviews":prod.product.product_reviews,"review_count":prod.product.review_count,
+                    "saleprice_enddate":prod.product.saleprice_enddate,"product_category":prod.product.category_name,"product_reviews":product_reviews,"review_count":len(pr),
                     "product_images":images})
                     product_data['product']=sale_product
                 save_val=True
@@ -162,10 +166,14 @@ def productformat(prod): # format to show data of products list
     save_val=True
 
     for prod in prod:
+                product_reviews=0
+                pr=None
                 images=prod.productimages_set.all().order_by('id')[:2].values()
+                pr=ProductReviews.objects.filter(product=prod.id).values()
+                product_reviews=CalculateRating(pr)
                 show_product.append({"product_id":prod.id,"product_name":prod.product_name,"stock":prod.product_quantity,"product_price":prod.product_price,
                 "sale_price":prod.sale_price,"created_date":prod.created_date,"saleprice_startdate":prod.saleprice_startdate,
-                "saleprice_enddate":prod.saleprice_enddate,"product_brand":prod.product_brand.brand_name,"product_category":prod.category_name,"product_review":prod.product_reviews,"review_count":prod.review_count,
+                "saleprice_enddate":prod.saleprice_enddate,"product_brand":prod.product_brand.brand_name,"product_category":prod.category_name,"product_reviews":product_reviews,"review_count":len(pr),
                 "product_images":images})
 
                 # remove duplicate categories
@@ -200,3 +208,18 @@ def productformat(prod): # format to show data of products list
                 
 
     return product_data
+
+
+def CalculateRating(pr):
+
+    sum_rate=0
+    count_rate=0
+    for pr1 in pr:
+        sum_rate=sum_rate+(pr1['stars'])
+    
+    count_rate=len(pr)
+
+    if (count_rate==0):
+        return 0
+    else:
+        return sum_rate/count_rate

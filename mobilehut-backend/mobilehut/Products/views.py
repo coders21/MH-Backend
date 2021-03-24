@@ -523,9 +523,11 @@ class DetailProduct(APIView):
         product_img=ProductImages.objects.filter(image_product=product_obj.id).values()
         product_colour=Colour.objects.filter(colour_product=product_obj.id).values()
         product_model=ProductModel.objects.filter(model_product=product_obj.id).values()
-        product_reviews=ProductReviews.objects.filter(product=product_obj.id)
+        product_reviews=ProductReviews.objects.filter(product=product_obj.id).values()
         rating=[ProductReviewSerializer(dat).data for dat in ProductReviews.objects.filter(product=product_obj.id).filter(status=True)]
-        
+        pr=CalculateRating(product_reviews)
+
+
         detail_product={
                 "product_name":product_obj.product_name,
                 "product_brand":product_obj.product_brand.brand_name,
@@ -535,8 +537,8 @@ class DetailProduct(APIView):
                 "product_price":product_obj.product_price,
                 "sale_price":product_obj.sale_price,
                 "product_description":product_obj.product_description,
-                "product_reviews":product_obj.product_reviews,
-                "review_count":product_obj.review_count,
+                "product_reviews":pr,
+                "review_count":len(product_reviews),
                 "saleprice_startdate":product_obj.saleprice_startdate,
                 "saleprice_enddate":product_obj.saleprice_enddate,
                 "product_images":product_img,
@@ -578,4 +580,16 @@ class ProductList(APIView):
 
 
 
+def CalculateRating(pr):
 
+    sum_rate=0
+    count_rate=0
+    for pr1 in pr:
+        sum_rate=sum_rate+(pr1['stars'])
+    
+    count_rate=len(pr)
+
+    if (count_rate==0):
+        return 0
+    else:
+        return sum_rate/count_rate
