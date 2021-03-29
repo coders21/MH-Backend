@@ -14,7 +14,7 @@ from rest_framework import status
 
 class CreateOrder(APIView):
 
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
     def post(self,request):
         payload=request.data
@@ -27,21 +27,27 @@ class CreateOrder(APIView):
 
 class GetOrder(APIView):
 
-    
-
     def post(self,request):
         payload=request.data
+        # non_user=None
         try:
             od = list(Order.objects.filter(order_status=payload['order_status']).values())
-        
+            nonuser=od
             for x in range(0,len(od)):
-                user=User.objects.get(id=od[x]['user_id'])
-                od[x]['customername']=user.username
-                od[x]['customercity']=user.city
-                od[x]['customerprovince']=user.province
-                od[x]['customeraddress']=user.address
-                od[x]['customerphonenumber']=user.phonenumber
-           
+                try:
+                    user=User.objects.get(id=od[x]['user_id'])
+                    od[x]['customername']=user.username
+                    od[x]['customercity']=user.city
+                    od[x]['customerprovince']=user.province
+                    od[x]['customeraddress']=user.address
+                    od[x]['customerphonenumber']=user.phonenumber
+                except:
+                    od[x]['customername']=nonuser[x]['customername']
+                    od[x]['customercity']=nonuser[x]['customercity']
+                    od[x]['customerprovince']=nonuser[x]['customerprovince']
+                    od[x]['customeraddress']=nonuser[x]['customeraddress']
+                    od[x]['customerphonenumber']=nonuser[x]['customerphonenumber']
+
         except (KeyError, Order.DoesNotExist):
             return Response('Order Not Found', status.HTTP_404_NOT_FOUND)
         else:
@@ -83,7 +89,7 @@ class ManageOrder(APIView):
 
 class CreateProductOrder(APIView):
 
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
     def get(self,request):
         return Response([ProductOrderSerializer(od).data for od in ProductOrder.objects.all()])
