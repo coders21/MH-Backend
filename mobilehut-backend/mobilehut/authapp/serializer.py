@@ -3,7 +3,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import User
+from .models import User,Contact
 
 class UserSerializer(ModelSerializer):
 
@@ -22,6 +22,7 @@ class UserSerializer(ModelSerializer):
             setattr(instance, k, v)
             instance.save()
         return instance
+
 
 class UserUpdateSerializer(ModelSerializer):
     class Meta:
@@ -72,3 +73,20 @@ class ChangePasswordSerializer(serializers.Serializer):
     def validate_new_password(self, value):
         validate_password(value)
         return value
+
+
+class ContactSerializerJSON(serializers.ModelSerializer):
+
+    class Meta:
+        model = Contact
+        fields = '__all__'
+
+    def create(self, validated_data):
+        cont = Contact.objects.create(**validated_data)
+        return cont
+
+    def update(self, instance, validated_data):
+        for k, v in validated_data.items():
+            setattr(instance, k, v)
+            instance.save()
+        return instance

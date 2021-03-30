@@ -1,14 +1,15 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializer import UserSerializer,UserUpdateSerializer,CustomTokenObtainPairSerializer,ChangePasswordSerializer
-from .models import User
+from .serializer import UserSerializer,UserUpdateSerializer,CustomTokenObtainPairSerializer,ChangePasswordSerializer,ContactSerializerJSON
+from .models import User,Contact
 from Orders.models import Order,ProductOrder
 from django.contrib.auth import authenticate,login
 from rest_framework import status
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
 )
+from rest_framework import generics
 
 
 class CreateUser(APIView):
@@ -149,10 +150,28 @@ class CreateSocial(APIView):
                     "id":user.id,
                     "email":user.email,
             }
-
-             
-        
+  
         return Response(user_serializer,status=status.HTTP_200_OK)
           
 
 
+class CreateContact(APIView):
+
+     def get(self,request):
+         return Response([ContactSerializerJSON(dat).data for dat in Contact.objects.all().order_by('-id')])
+    
+     def post(self, request):
+        payload = request.data
+        print(payload)
+        serializer = ContactSerializerJSON(data=payload)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class ViewContact(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Contact.objects.all()
+    serializer_class = ContactSerializerJSON
+    lookup_field = 'pk'

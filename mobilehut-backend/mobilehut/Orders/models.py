@@ -25,3 +25,5 @@ class ProductOrder(models.Model):
     quantity=models.IntegerField(blank=True)
     colour=models.CharField(max_length=40,default="green",blank=True)
     modelP=models.CharField(max_length=50,default="",blank=True)
+
+

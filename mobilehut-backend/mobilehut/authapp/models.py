@@ -65,3 +65,11 @@ class User(AbstractBaseUser,PermissionsMixin):
 
     def get_short_name(self):
         return self.email
+
+
+class Contact(models.Model):
+    contact_name=models.CharField(max_length=40,null=True,blank=True)
+    contact_email=models.CharField(max_length=40,null=True,blank=True)
+    contact_subject=models.CharField(max_length=40,null=True,blank=True)
+    contact_message=models.CharField(max_length=250,null=True,blank=True)
+    contact_number=models.CharField(max_length=20,null=True,blank=True)

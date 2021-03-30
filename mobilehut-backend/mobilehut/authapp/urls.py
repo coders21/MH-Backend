@@ -17,5 +17,9 @@ urlpatterns=[
     path('manage_user/<id>/', views.ManageUser.as_view(), name='ManageUser'),
     path('account_detail/', views.AccountDetail.as_view(), name='AccountDetail'),
     path('change_password/', views.UpdatePassword.as_view(), name='UpdatePassword'),
-    path('create_user_social/',views.CreateSocial.as_view(), name='SocialUser')
+    path('create_user_social/',views.CreateSocial.as_view(), name='SocialUser'),
+    path('create_contact/', views.CreateContact.as_view(), name='CreateContact'),
+    path('view_contact/<pk>/', views.ViewContact.as_view(), name='ViewContact'),
+
+    
 ]

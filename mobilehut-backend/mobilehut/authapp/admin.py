@@ -1,7 +1,7 @@
 from django.contrib import admin
 # Register your models here.
 from django.contrib.auth.admin import UserAdmin
-from .models import User
+from .models import User,Contact
 from django.contrib.sites.models import Site
 # Register your models here.
 
@@ -22,4 +22,5 @@ class CustomUserAdmin(UserAdmin):
     ordering = ('password',)
 
 admin.site.register(User,UserAdmin)
+admin.site.register(Contact)
 #admin.site.register(Site)
