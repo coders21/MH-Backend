@@ -4,6 +4,8 @@ from Homepage.models import Sale,ProductSale,RecommendedProduct
 import random
 from datetime import datetime,date,timedelta
 from Products.models import ProductReviews
+from django.db.models import Q
+
 def getcategoryProducts(id):
    
     prod=Product.objects.filter(product_category=id).select_related('product_category','product_brand')
@@ -88,6 +90,13 @@ def getsaleProducts():
 
      return product_data
 
+
+def getSearchProducts(text):
+    product_data=None
+    # prod=Product.objects.filter(Q(product_name__search=text))
+    # product_data=productformat(prod)
+
+    return product_data
 
 def productformatSecond(prod):
 
