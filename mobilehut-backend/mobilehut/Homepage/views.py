@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from Products.models import Category,Product,ProductImages,Brand,ProductReviews
+from Products.models import Category,Product,ProductImages,Brand,ProductReviews,ProductModel,Colour
 from rest_framework import status
 from rest_framework import generics
 from .models import Carousel,OneBanner,ThreeBanner,Sale,ProductSale,RecommendedProduct,TrendingProductImage
@@ -184,12 +184,14 @@ class GetHomeData(APIView):
                             break
                 if save_val:
                     pr=ProductReviews.objects.filter(product=prod.product_id).values()
+                    pm=ProductModel.objects.filter(model_product=prod.product_id).values()
+                    pc=Colour.objects.filter(colour_product=prod.product_id).values()
                     review_product=CalculateRating(pr)
                     images=prod.product.productimages_set.all().order_by('id')[:2].values()
                     sale_product.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"stock":prod.product.product_quantity,"product_price":prod.product.product_price,
                     "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
                     "saleprice_enddate":prod.product.saleprice_enddate,"product_category":prod.product.category_name,"product_reviews":review_product,"review_count":len(pr),
-                    "product_images":images})
+                    "product_images":images,'product_colour':pc,'product_model':pm})
                 save_val=True
             homepagedata['sale']={
                     "startdate":sale.startdate,
@@ -211,11 +213,13 @@ class GetHomeData(APIView):
         trend_products=[]
         for prod in prod:
             pr=ProductReviews.objects.filter(product=prod.id).values()
+            pm=ProductModel.objects.filter(model_product=prod.id).values()
+            pc=Colour.objects.filter(colour_product=prod.id).values()
             review_product=CalculateRating(pr)
             images=prod.productimages_set.all().order_by('id')[:2].values()
             trend_products.append({"product_id":prod.id,"product_name":prod.product_name,"stock":prod.product_quantity,"product_category":prod.category_name,"product_price":prod.product_price,
                 "sale_price":prod.sale_price,"saleprice_startdate":prod.saleprice_startdate,
-                "saleprice_enddate":prod.saleprice_enddate,"product_reviews":review_product,"review_count":len(pr),"product_images":images})
+                "saleprice_enddate":prod.saleprice_enddate,"product_reviews":review_product,"review_count":len(pr),"product_images":images,'product_colour':pc,'product_model':pm})
        
         homepagedata['trending_products']=trend_products
 
@@ -223,11 +227,13 @@ class GetHomeData(APIView):
         recommended=[]
         for prod in prod:
             pr=ProductReviews.objects.filter(product=prod.product.id).values()
+            pm=ProductModel.objects.filter(model_product=prod.product.id).values()
+            pc=Colour.objects.filter(colour_product=prod.product.id).values()
             review_product=CalculateRating(pr)
             images=prod.product.productimages_set.all().order_by('id')[:2].values()
             recommended.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"stock":prod.product.product_quantity,"product_category":prod.product.category_name,"product_price":prod.product.product_price,
                 "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
-                "saleprice_enddate":prod.product.saleprice_enddate,"product_reviews":review_product,"review_count":len(pr),"product_images":images})
+                "saleprice_enddate":prod.product.saleprice_enddate,"product_reviews":review_product,"review_count":len(pr),"product_images":images,"product_color":pc,"product_model":pm})
         homepagedata['recommended_product']=recommended
 
         
@@ -235,11 +241,13 @@ class GetHomeData(APIView):
         new_arrival_product=[]
         for prod in prod:
             pr=ProductReviews.objects.filter(product=prod.id).values()
+            pm=ProductModel.objects.filter(model_product=prod.id).values()
+            pc=Colour.objects.filter(colour_product=prod.id).values()
             review_product=CalculateRating(pr)
             images=prod.productimages_set.all().order_by('id')[:2].values()
             new_arrival_product.append({"product_id":prod.id,"product_name":prod.product_name,"stock":prod.product_quantity,"product_category":prod.category_name,"product_price":prod.product_price,
                 "sale_price":prod.sale_price,"saleprice_startdate":prod.saleprice_startdate,"created_date":prod.created_date,
-                "saleprice_enddate":prod.saleprice_enddate,"product_reviews":review_product,"review_count":len(pr),"product_images":images})
+                "saleprice_enddate":prod.saleprice_enddate,"product_reviews":review_product,"review_count":len(pr),"product_images":images,"product_colour":pc,"product_model":pm})
             
        
         select_new_arrival=[]
