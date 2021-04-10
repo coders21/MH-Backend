@@ -34,7 +34,7 @@ class ModelType(models.Model):
 
 class ProductModel(models.Model):
     modelid=models.ForeignKey(ModelType,null=True,on_delete=models.CASCADE)
-    model_product=models.CharField(max_length=150, blank=True)
+    model_product=models.ForeignKey(Product,null=True,on_delete=models.CASCADE)
     model_name=models.CharField(max_length=130,blank=True)
 
 class Colour(models.Model):

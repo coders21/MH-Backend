@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'Homepage.apps.HomepageConfig',
     'corsheaders',  # new addition
     'rest_framework.authtoken',
+    'django.contrib.postgres',
     'djoser',
 ]
 

@@ -236,7 +236,10 @@ class ManageProduct(APIView):
             serializer = ProductSerializer(pro)
             colour=Colour.objects.filter(colour_product=pro.id).values()
             model=ProductModel.objects.filter(model_product=pro.id).values()
-
+            
+            print("======================")
+            print(model)
+            print("=========================")
             select_colour={}
             append_color=[]
             select_model={}
@@ -260,8 +263,7 @@ class ManageProduct(APIView):
             product_data['product_colors']=append_color
             product_data['product_models']=append_model
             
-            print(product_data)
-            
+          
             return Response(product_data, status=status.HTTP_200_OK)
 
     def put(self, request, id):
@@ -280,7 +282,7 @@ class ManageProduct(APIView):
                 del_colour=Colour.objects.get(id=int(x['id']))
                 del_colour.delete()
             
-            try:
+            try: 
                 mdl=ProductModel.objects.filter(model_product=pro.id)
                 mdl.delete()
             except:
@@ -577,7 +579,7 @@ class ProductList(APIView):
         elif (select_type=="recommended"):
             show_data=getrecommendedProducts()
         elif (select_type=="search"):
-            show_data=getSearchProducts(request.data['text'])
+            show_data=getSearchProducts(request.data['id'])
         return Response(show_data,status=status.HTTP_200_OK)
 
 

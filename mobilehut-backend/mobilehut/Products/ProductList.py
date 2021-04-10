@@ -5,7 +5,7 @@ import random
 from datetime import datetime,date,timedelta
 from Products.models import ProductReviews
 from django.db.models import Q
-
+from django.contrib.postgres.search import SearchVector,SearchQuery,SearchRank
 def getcategoryProducts(id):
    
     prod=Product.objects.filter(product_category=id).select_related('product_category','product_brand')
@@ -92,7 +92,25 @@ def getsaleProducts():
 
 
 def getSearchProducts(text):
+
     product_data=None
+    
+    # words=text.split(" ")
+    # print("words===>",words)
+    # q_filters=Q()
+    # for words in words:
+    #       q_filters |= Q(search=SearchQuery(words))
+          
+    prod=Product.objects.annotate(search=SearchVector('product_name','product_sku'),).filter(search=SearchQuery(text))
+         
+    # vector=SearchVector('product_name') + \
+    # SearchVector('product_sku')
+
+    # query=SearchQuery(text)
+    # prod=Product.objects.annotate(
+    #     rank=SearchRank(vector,query,cover_density=True)).order_by('-rank')
+    
+    product_data=productformat(prod)
     # prod=Product.objects.filter(Q(product_name__search=text))
     # product_data=productformat(prod)
 
