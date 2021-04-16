@@ -162,7 +162,6 @@ class CreateContact(APIView):
     
      def post(self, request):
         payload = request.data
-        print(payload)
         serializer = ContactSerializerJSON(data=payload)
 
         if serializer.is_valid():
@@ -175,3 +174,7 @@ class ViewContact(generics.RetrieveUpdateDestroyAPIView):
     queryset = Contact.objects.all()
     serializer_class = ContactSerializerJSON
     lookup_field = 'pk'
+
+
+SAFE_METHODS = ['POST']
+

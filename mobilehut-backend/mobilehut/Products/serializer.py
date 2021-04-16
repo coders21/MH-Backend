@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
-from .models import Product,Category,Brand,ModelType,Colour,ProductImages,ProductReviews
+from .models import Product,Category,Brand,ModelType,Colour,ProductImages,ProductReviews,ProductModel
 
 class CategorySerializer(serializers.ModelSerializer):
 
@@ -121,6 +121,23 @@ class ProductReviewSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         pr = ProductReviews.objects.create(**validated_data)
+        return pr
+
+    def update(self, instance, validated_data):
+        for k, v in validated_data.items():
+            setattr(instance, k, v)
+            instance.save()
+        return instance
+
+
+class ProductModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model =ProductModel
+        fields ='__all__'
+
+    def create(self, validated_data):
+        pr = ProductModel.objects.create(**validated_data)
         return pr
 
     def update(self, instance, validated_data):

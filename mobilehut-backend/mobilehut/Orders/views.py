@@ -4,17 +4,15 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializer import OrderSerializer,OrderUpdateSerializer,ProductOrderSerializer
 from .models import Order,ProductOrder
-from Products.models import Product,ModelType
+from Products.models import Product,ModelType,ProductModel
 from authapp.models import User
 from rest_framework.permissions import IsAuthenticated
 #from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
-
+from rest_framework.permissions import IsAuthenticatedOrReadOnly,BasePermission, SAFE_METHODS
 # Order Views
 
 class CreateOrder(APIView):
-
-    #permission_classes = [IsAuthenticated]
 
     def post(self,request):
         payload=request.data
@@ -29,7 +27,7 @@ class GetOrder(APIView):
 
     def post(self,request):
         payload=request.data
-        # non_user=None
+        permission_classes=[IsAuthenticatedOrReadOnly]
         try:
             od = list(Order.objects.filter(order_status=payload['order_status']).values())
             nonuser=od
@@ -41,6 +39,7 @@ class GetOrder(APIView):
                     od[x]['customerprovince']=user.province
                     od[x]['customeraddress']=user.address
                     od[x]['customerphonenumber']=user.phonenumber
+                    od[x]['customeremail']=user.email
                 except:
                     od[x]['customername']=nonuser[x]['customername']
                     od[x]['customercity']=nonuser[x]['customercity']
@@ -89,7 +88,6 @@ class ManageOrder(APIView):
 
 class CreateProductOrder(APIView):
 
-    #permission_classes = [IsAuthenticated]
 
     def get(self,request):
         return Response([ProductOrderSerializer(od).data for od in ProductOrder.objects.all()])
@@ -106,7 +104,7 @@ class CreateProductOrder(APIView):
 
 class ManageProductOrder(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes=[IsAuthenticatedOrReadOnly]
 
     def get(self, request, id):
 
@@ -136,17 +134,18 @@ class ManageProductOrder(APIView):
 
 class GetPOrder(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes=[IsAuthenticatedOrReadOnly]
 
     def get(self,request,id):
         order_details=[]
         product_details=[]
         #order_info=list(Order.objects.filter(id=id).values())
         porders=ProductOrder.objects.filter(order=id).values()
-        
+       
       
         for x in range(0,len(porders)):
             prod=list(Product.objects.filter(id=porders[x]['product_id']).values())
+          
             prod[0]['quantity']=porders[x]['quantity']
             prod[0]['colour']=porders[x]['colour']
             modelname=ModelType.objects.get(id=porders[x]['modelP'])
@@ -157,3 +156,17 @@ class GetPOrder(APIView):
         my_dict['products']=product_details
         #order_info[0]['products']=product_details
         return Response(my_dict,status=status.HTTP_200_OK)
+
+
+SAFE_METHODS = ['POST','PUT','DELETE']
+class IsAuthenticatedOrReadOnly(BasePermission):
+    """
+    The request is authenticated as a user.
+    """
+
+    def has_permission(self, request, view):
+        if (request.method in SAFE_METHODS or
+            request.user and
+            request.user.is_authenticated()):
+            return True
+        return False

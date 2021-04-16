@@ -12,15 +12,18 @@ from django.db import connection, reset_queries
 from datetime import datetime,timedelta,date
 import random
 from django.db.models import Q
+from rest_framework.permissions import IsAuthenticatedOrReadOnly,BasePermission, SAFE_METHODS
 
 class CreateCarousel(generics.ListCreateAPIView):
     parser_classes = (MultiPartParser, FormParser)
+    permission_classes=[IsAuthenticatedOrReadOnly]
     queryset=Carousel.objects.all()
     serializer_class=CarouselSerializer
     
 
 class ManageCarousel(generics.RetrieveUpdateDestroyAPIView):
     parser_classes = (MultiPartParser, FormParser)
+    permission_classes=[IsAuthenticatedOrReadOnly]
     queryset = Carousel.objects.all()
     serializer_class = CarouselSerializer
     lookup_field = 'pk'
@@ -28,12 +31,14 @@ class ManageCarousel(generics.RetrieveUpdateDestroyAPIView):
 
 class CreateThreeBanner(generics.ListCreateAPIView):
     parser_classes = (MultiPartParser, FormParser)
+    permission_classes=[IsAuthenticatedOrReadOnly]
     queryset=ThreeBanner.objects.all()
     serializer_class=ThreeBannerSerializer
     
 
 class ManageThreeBanner(generics.RetrieveUpdateDestroyAPIView):
     parser_classes = (MultiPartParser, FormParser)
+    permission_classes=[IsAuthenticatedOrReadOnly]
     queryset = ThreeBanner.objects.all()
     serializer_class = ThreeBannerSerializer
     lookup_field = 'pk'
@@ -41,23 +46,27 @@ class ManageThreeBanner(generics.RetrieveUpdateDestroyAPIView):
 
 class CreateOneBanner(generics.ListCreateAPIView):
     parser_classes = (MultiPartParser, FormParser)
+    permission_classes=[IsAuthenticatedOrReadOnly]
     queryset=OneBanner.objects.all()
     serializer_class=OneBannerSerializer
     
 
 class ManageOneBanner(generics.RetrieveUpdateDestroyAPIView):
     parser_classes = (MultiPartParser, FormParser)
+    permission_classes=[IsAuthenticatedOrReadOnly]
     queryset = OneBanner.objects.all()
     serializer_class = OneBannerSerializer
     lookup_field = 'pk'
     
 
 class CreateSale(generics.ListCreateAPIView):
+    permission_classes=[IsAuthenticatedOrReadOnly]
     queryset=Sale.objects.all()
     serializer_class=SaleSerializer
     
 
 class ManageSale(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes=[IsAuthenticatedOrReadOnly]
     queryset = Sale.objects.all()
     serializer_class = SaleSerializer
     lookup_field = 'pk'
@@ -81,6 +90,8 @@ class GetSaleProduct(APIView):
 
 
 class CreateProductSale(APIView):
+
+     permission_classes=[IsAuthenticatedOrReadOnly]
 
      def get(self,request):
          return Response([ProductSaleSerializer(dat).data for dat in ProductSale.objects.all()])
@@ -113,6 +124,7 @@ class CreateProductSale(APIView):
 class ManageProductSale(APIView):
     
     # Removing product from sale
+    permission_classes=[IsAuthenticatedOrReadOnly]
     def post (self,request,id):
         
         payload=request.data
@@ -124,6 +136,7 @@ class ManageProductSale(APIView):
 
 class CreateRecommendedProduct(APIView):
 
+    permission_classes=[IsAuthenticatedOrReadOnly]
     def get(self,request):
          return Response([RecommendedProductSerializer(dat).data for dat in RecommendedProduct.objects.all()])
     
@@ -146,6 +159,7 @@ class CreateRecommendedProduct(APIView):
     
 
 class ManageRecommendedProduct (generics.RetrieveUpdateDestroyAPIView):
+    permission_classes=[IsAuthenticatedOrReadOnly]
     queryset = RecommendedProduct.objects.all()
     serializer_class = RecommendedProductSerializer
     lookup_field = 'pk'
@@ -199,7 +213,6 @@ class GetHomeData(APIView):
                     "salename":sale.name,
                     "product":sale_product
             }
-        
 
         one_banner=OneBanner.objects.all().values()
         homepagedata['one_banner']=one_banner
@@ -233,7 +246,7 @@ class GetHomeData(APIView):
             images=prod.product.productimages_set.all().order_by('id')[:2].values()
             recommended.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"stock":prod.product.product_quantity,"product_category":prod.product.category_name,"product_price":prod.product.product_price,
                 "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
-                "saleprice_enddate":prod.product.saleprice_enddate,"product_reviews":review_product,"review_count":len(pr),"product_images":images,"product_color":pc,"product_model":pm})
+                "saleprice_enddate":prod.product.saleprice_enddate,"product_reviews":review_product,"review_count":len(pr),"product_images":images,"product_colour":pc,"product_model":pm})
         homepagedata['recommended_product']=recommended
 
         
@@ -287,3 +300,17 @@ def CalculateRating(pr):
         return 0
     else:
         return sum_rate/count_rate
+
+
+SAFE_METHODS = ['POST','PUT','DELETE']
+class IsAuthenticatedOrReadOnly(BasePermission):
+    """
+    The request is authenticated as a user.
+    """
+
+    def has_permission(self, request, view):
+        if (request.method in SAFE_METHODS or
+            request.user and
+            request.user.is_authenticated()):
+            return True
+        return False

@@ -1,10 +1,10 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializer import ProductSerializer,CategorySerializer,BrandSerializer,ModelSerializer,ColourSerializer,ProductImgSerializer,ProductReviewSerializer
+from .serializer import ProductSerializer,CategorySerializer,BrandSerializer,ModelSerializer,ColourSerializer,ProductImgSerializer,ProductReviewSerializer,ProductModelSerializer
 from .models import Product,Category,Brand,ModelType,Colour,ProductImages,ProductModel,ProductReviews
 from .ProductList import getcategoryProducts,getbrandProducts,getunder99Products,getclearanceProducts,getbuyerpickProducts,getsaleProducts,getnewarrivalProducts,gettrendingProducts,getrecommendedProducts,getSearchProducts
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticatedOrReadOnly,BasePermission, SAFE_METHODS
 from Orders.models import Order
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
@@ -16,7 +16,7 @@ from datetime import datetime
 
 class CreateCategory(APIView):
 
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
    
 
     def get(self,request):
@@ -34,7 +34,7 @@ class CreateCategory(APIView):
 
 class ManageCategory(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request, id):
 
@@ -76,7 +76,7 @@ class ManageCategory(APIView):
 
 class CreateBrand(APIView):
 
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     parser_classes = (MultiPartParser, FormParser)
     def get(self,request):
         return Response([BrandSerializer(dat).data for dat in Brand.objects.all()])
@@ -93,7 +93,7 @@ class CreateBrand(APIView):
 
 class ManageBrand(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     parser_classes = (MultiPartParser, FormParser)
 
     def get(self, request, id):
@@ -136,7 +136,7 @@ class ManageBrand(APIView):
 
 class CreateModel(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self,request):
         return Response([ModelSerializer(dat).data for dat in ModelType.objects.all()])
@@ -153,7 +153,7 @@ class CreateModel(APIView):
 
 class ManageModel(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request, id):
 
@@ -194,7 +194,7 @@ class ManageModel(APIView):
 #### PRODUCT VIEWS ####
 class CreateProduct(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self,request):
         return Response([ProductSerializer(dat).data for dat in Product.objects.all()])
@@ -215,7 +215,7 @@ class CreateProduct(APIView):
                 Colour.objects.create(colour_name=x['name'],colour_product=productobj)
             # now save models
             for x in payload['product_models']:
-                pmodel=ModelType.objects.get(id=x['id'])
+                pmodel=ModelType.objects.get(model_name=x['model_name'])
                 ProductModel.objects.create(modelid=pmodel,model_product=productobj,model_name=x['model_name'])
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -224,7 +224,7 @@ class CreateProduct(APIView):
 
 class ManageProduct(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request, id):
 
@@ -237,9 +237,6 @@ class ManageProduct(APIView):
             colour=Colour.objects.filter(colour_product=pro.id).values()
             model=ProductModel.objects.filter(model_product=pro.id).values()
             
-            print("======================")
-            print(model)
-            print("=========================")
             select_colour={}
             append_color=[]
             select_model={}
@@ -294,11 +291,25 @@ class ManageProduct(APIView):
                 Colour.objects.create(colour_name=x['name'],colour_product=pro)
             
             #now save model
-
+            
             for x in payload['product_models']:
                 try:
                     pmodel=ModelType.objects.get(model_name=x['model_name'])
-                    ProductModel.objects.create(modelid=pmodel,model_name=x['model_name'],model_product=pro.id)
+                    modelData={
+                        "modelid":pmodel.id,
+                        "model_name":x['model_name'],
+                        "model_product":pro.id
+                    }
+                    mserializer=ProductModelSerializer(data=modelData)
+                    if mserializer.is_valid():
+                        mserializer.save()
+                        print(mserializer.data)
+                    else:
+                        print(mserializer.errors)
+                        return Response(mserializer.errors,status=status.HTTP_400_BAD_REQUEST)
+                    # pmodel=ProductModel.objects.create(modelid=pmodel,model_name=x['model_name'],model_product=pro.id)
+                    # pmodel.save()
+                    # print("model is",pmodel)
                 except:
                     pass
 
@@ -325,7 +336,7 @@ class ManageProduct(APIView):
 #### Color VIEWS ####
 class CreateColour(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self,request):
         return Response([ColourSerializer(dat).data for dat in Colour.objects.all()])
@@ -342,7 +353,7 @@ class CreateColour(APIView):
 
 class ManageColour(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request, id):
 
@@ -402,7 +413,7 @@ class CreateProductImages(APIView):
 ## delete or add more images
 class ManageProductImages(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     parser_classes = (MultiPartParser, FormParser)
 
     def get(self, request, id):
@@ -489,7 +500,7 @@ class SiteReview(APIView): #user
 # Get Total Brands,Models,Categories
 class GetTotal(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self,request):
 
@@ -597,3 +608,17 @@ def CalculateRating(pr):
         return 0
     else:
         return sum_rate/count_rate
+
+
+SAFE_METHODS = ['POST','PUT','DELETE']
+class IsAuthenticatedOrReadOnly(BasePermission):
+    """
+    The request is authenticated as a user.
+    """
+
+    def has_permission(self, request, view):
+        if (request.method in SAFE_METHODS or
+            request.user and
+            request.user.is_authenticated()):
+            return True
+        return False
