@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django.contrib.postgres',
     'djoser',
+    'django_cleanup'
 ]
 
 SITE_ID=2

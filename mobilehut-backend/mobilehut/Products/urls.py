@@ -1,5 +1,6 @@
 from django.conf.urls import url
 from . import views
+from django.urls import path
 
 urlpatterns = [
     
@@ -27,7 +28,7 @@ urlpatterns = [
     url(r'^manage_images/(?P<id>\d+)/$', views.ManageProductImages.as_view(), name='EditImages'),
 
     url(r'^get_total/$', views.GetTotal.as_view(), name='Total'),
-    url(r'^get_specific_product/(?P<id>\d+)/$', views.DetailProduct.as_view(), name='DetailProduct'),
+    path('get_specific_product/<str:name>/', views.DetailProduct.as_view(), name='DetailProduct'),
     url(r'^get_product_list/$', views.ProductList.as_view(), name="ProductList"),
 
     url(r'^admin/reviews/$',views.GetReview.as_view(),name='AdminReview'), #allget,#put

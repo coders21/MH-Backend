@@ -530,9 +530,10 @@ class GetTotal(APIView):
 
 class DetailProduct(APIView):
 
-    def get(self,request,id):
-
-        product_obj=Product.objects.get(id=id)
+    def get(self,request,name):
+        
+        
+        product_obj=Product.objects.get(product_name=name)
         product_img=ProductImages.objects.filter(image_product=product_obj.id).values()
         product_colour=Colour.objects.filter(colour_product=product_obj.id).values()
         product_model=ProductModel.objects.filter(model_product=product_obj.id).values()
