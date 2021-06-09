@@ -531,7 +531,8 @@ class GetTotal(APIView):
 class DetailProduct(APIView):
 
     def get(self,request,name):
-        
+       
+        name=name.replace('-',' ')
         
         product_obj=Product.objects.get(product_name=name)
         product_img=ProductImages.objects.filter(image_product=product_obj.id).values()

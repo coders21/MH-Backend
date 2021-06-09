@@ -31,6 +31,7 @@ class GetOrder(APIView):
         try:
             od = list(Order.objects.filter(order_status=payload['order_status']).values())
             nonuser=od
+           
             for x in range(0,len(od)):
                 try:
                     user=User.objects.get(id=od[x]['user_id'])
@@ -94,6 +95,10 @@ class CreateProductOrder(APIView):
 
     def post(self,request):
         payload=request.data
+        name=payload['product'].replace('-',' ')
+        product=Product.objects.get(product_name=name)
+        payload['product']=product.id
+       
         serializer = ProductOrderSerializer(data=payload)
 
         if serializer.is_valid():

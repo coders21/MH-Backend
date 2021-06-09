@@ -6,17 +6,18 @@ from datetime import datetime,date,timedelta
 from Products.models import ProductReviews
 from django.db.models import Q
 from django.contrib.postgres.search import SearchVector,SearchQuery,SearchRank
+
 def getcategoryProducts(id):
-   
-    prod=Product.objects.filter(product_category=id).select_related('product_category','product_brand')
+    
+    prod=Product.objects.filter(category_name=id).select_related('product_category','product_brand')
     product_data=productformat(prod)
     
     return product_data
     
 
 def getbrandProducts(id):
-
-    prod=Product.objects.filter(product_brand=id).select_related('product_category','product_brand')
+    brand_product=Brand.objects.get(brand_name=id)
+    prod=Product.objects.filter(product_brand=brand_product.id).select_related('product_category','product_brand')
     product_data=productformat(prod)
     
     return product_data
