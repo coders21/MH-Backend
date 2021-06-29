@@ -9,7 +9,8 @@ from django.contrib.postgres.search import SearchVector,SearchQuery,SearchRank
 
 def getcategoryProducts(id):
     
-    prod=Product.objects.filter(category_name=id).select_related('product_category','product_brand')
+    category_product=Category.objects.get(category_name=id)
+    prod=Product.objects.filter(product_category=category_product.id).select_related('product_category','product_brand')
     product_data=productformat(prod)
     
     return product_data

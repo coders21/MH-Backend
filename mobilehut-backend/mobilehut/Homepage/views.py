@@ -169,14 +169,14 @@ class GetHomeData(APIView):
 
     def get(self,request):
        
-        carousel=Carousel.objects.all().values()
-        main_banner_carousel={
-            "carousel":carousel
-        }
+        # carousel=Carousel.objects.all().values()
+        # main_banner_carousel={
+        #     "carousel":carousel
+        # }
         categories=Category.objects.all().values()
         
         homepagedata={}
-        homepagedata['carousel']=main_banner_carousel['carousel']
+        #homepagedata['carousel']=main_banner_carousel['carousel']
         homepagedata['category']=categories
         brands=Brand.objects.all().order_by('id')[:6].values()
         homepagedata['brands']=brands
@@ -216,11 +216,11 @@ class GetHomeData(APIView):
 
         one_banner=OneBanner.objects.all().values()
         homepagedata['one_banner']=one_banner
-        threebanner=ThreeBanner.objects.all().values()
-        three_banner={
-            "banner":threebanner
-        }
-        homepagedata['three_banner']=three_banner['banner']
+        # threebanner=ThreeBanner.objects.all().values()
+        # three_banner={
+        #     "banner":threebanner
+        # }
+        # homepagedata['three_banner']=three_banner['banner']
         
         prod=Product.objects.all().order_by('review_count')[:8]
         trend_products=[]

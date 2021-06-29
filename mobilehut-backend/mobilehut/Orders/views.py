@@ -38,14 +38,14 @@ class GetOrder(APIView):
                     od[x]['customername']=user.username
                     od[x]['customercity']=user.city
                     od[x]['customerprovince']=user.province
-                    od[x]['customeraddress']=user.address
+                    od[x]['customeraddress']=user.address+','+user.city+','+user.province
                     od[x]['customerphonenumber']=user.phonenumber
                     od[x]['customeremail']=user.email
                 except:
                     od[x]['customername']=nonuser[x]['customername']
                     od[x]['customercity']=nonuser[x]['customercity']
                     od[x]['customerprovince']=nonuser[x]['customerprovince']
-                    od[x]['customeraddress']=nonuser[x]['customeraddress']
+                    od[x]['customeraddress']=nonuser[x]['customeraddress']+','+nonuser[x]['customercity']+','+nonuser[x]['customerprovince']
                     od[x]['customerphonenumber']=nonuser[x]['customerphonenumber']
 
         except (KeyError, Order.DoesNotExist):
