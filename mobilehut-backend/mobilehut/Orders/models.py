@@ -26,4 +26,10 @@ class ProductOrder(models.Model):
     colour=models.CharField(max_length=40,default="green",blank=True)
     modelP=models.CharField(max_length=50,default="",blank=True)
 
+class Coupan(models.Model):
 
+    coupan_name=models.CharField(max_length=100,blank=True,null=True)
+    coupan_discount=models.FloatField(null=True,blank=True)
+    startdate=models.DateField(null=True,blank=True)
+    enddate=models.DateField(null=True,blank=True)
+    coupan_limit=models.IntegerField(null=True,blank=True)

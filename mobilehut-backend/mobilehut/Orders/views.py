@@ -2,8 +2,8 @@ from django.shortcuts import render
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializer import OrderSerializer,OrderUpdateSerializer,ProductOrderSerializer
-from .models import Order,ProductOrder
+from .serializer import OrderSerializer,OrderUpdateSerializer,ProductOrderSerializer,CoupanSerializer
+from .models import Order,ProductOrder,Coupan
 from Products.models import Product,ModelType,ProductModel
 from authapp.models import User
 from rest_framework.permissions import IsAuthenticated
@@ -161,6 +161,59 @@ class GetPOrder(APIView):
         my_dict['products']=product_details
         #order_info[0]['products']=product_details
         return Response(my_dict,status=status.HTTP_200_OK)
+
+
+class CreateCoupan(APIView):
+
+    def get(self,request):
+        return Response([CoupanSerializer(od).data for od in Coupan.objects.all()])
+
+    def post(self,request):
+        payload=request.data
+        serializer = CoupanSerializer(data=payload)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ManageCoupan(APIView):
+
+    def get(self, request, id):
+
+        try:
+            cp = Coupan.objects.get(id=int(id))
+        except (KeyError, Coupan.DoesNotExist):
+            return Response('Coupan Not Found', status.HTTP_404_NOT_FOUND)
+        else:
+            serializer = CoupanSerializer(cp)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, id):
+
+        try:
+            cp = Coupan.objects.get(id=int(id))
+        except (KeyError, Coupan.DoesNotExist):
+            return Response('Coupan Not Found', status.HTTP_404_NOT_FOUND)
+        else:
+            payload = request.data
+            serializer = CoupanSerializer(cp,data=payload)
+
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, id):
+
+        try:
+            cp = Coupan.objects.get(id=int(id))
+        except (KeyError, Coupan.DoesNotExist):
+            return Response('Coupan Not Found', status.HTTP_404_NOT_FOUND)
+        else:
+            cp.delete()
+            return Response("Coupan Deleted", status.HTTP_200_OK)
 
 
 SAFE_METHODS = ['POST','PUT','DELETE']

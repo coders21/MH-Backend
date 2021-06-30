@@ -1,4 +1,4 @@
-from .models import Order,ProductOrder
+from .models import Order,ProductOrder,Coupan
 from rest_framework import serializers
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -43,6 +43,24 @@ class ProductOrderSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         Pordr = ProductOrder.objects.create(**validated_data)
         return Pordr
+
+    def update(self, instance, validated_data):
+        for k, v in validated_data.items():
+            setattr(instance, k, v)
+            instance.save()
+        return instance
+
+
+
+class CoupanSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Coupan
+        fields = '__all__'
+
+    def create(self, validated_data):
+        coupan_check = Coupan.objects.create(**validated_data)
+        return coupan_check
 
     def update(self, instance, validated_data):
         for k, v in validated_data.items():
