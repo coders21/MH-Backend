@@ -1,5 +1,6 @@
 from django.conf.urls import url
 from . import views
+from django.urls import path
 
 urlpatterns = [
     
@@ -11,5 +12,6 @@ urlpatterns = [
     url(r'^get_porder/(?P<id>\d+)/$', views.GetPOrder.as_view(), name='GetPOrder'),
     url(r'^create_coupan/$', views.CreateCoupan.as_view(), name='CreateCoupan'),
     url(r'^manage_coupan/(?P<id>\d+)/$', views.ManageCoupan.as_view(), name='ManageCoupan'),
+    path('get_discount/<str:coupan>/', views.GetCoupan.as_view(), name='GetCoupan'),
    
 ]

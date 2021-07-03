@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 #from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly,BasePermission, SAFE_METHODS
+import datetime
 # Order Views
 
 class CreateOrder(APIView):
@@ -214,6 +215,41 @@ class ManageCoupan(APIView):
         else:
             cp.delete()
             return Response("Coupan Deleted", status.HTTP_200_OK)
+
+
+class GetCoupan(APIView):
+
+    def get(self,request,coupan):
+
+        try:
+
+            cp=Coupan.objects.get(coupan_name=coupan)
+
+        except (KeyError, Coupan.DoesNotExist):
+
+            return Response("Wrong coupan,please try again",status.HTTP_404_NOT_FOUND)
+
+        else:
+
+            current_date=datetime.date.today()
+            if cp.startdate<=current_date and cp.enddate>=current_date:
+
+                if cp.coupan_limit>0:
+                  cp.coupan_limit=cp.coupan_limit-1
+                  cp.save()
+                  return Response({
+                      "discount":cp.coupan_discount,
+                      "successfull":"Coupan Used Successfully!"
+                  },status=status.HTTP_200_OK)
+
+                else:
+                  return Response({"issuename":"Coupan limit is ended, try another coupan"},status.HTTP_404_NOT_FOUND)
+
+            else:
+
+                return Response({"issuename":"Coupan Expired!, try new coupan"},status.HTTP_404_NOT_FOUND)
+
+            
 
 
 SAFE_METHODS = ['POST','PUT','DELETE']
