@@ -227,7 +227,7 @@ class GetCoupan(APIView):
 
         except (KeyError, Coupan.DoesNotExist):
 
-            return Response("Wrong coupan,please try again",status.HTTP_404_NOT_FOUND)
+            return Response({"issuename":"Wrong coupan,please try again"},status.HTTP_404_NOT_FOUND)
 
         else:
 

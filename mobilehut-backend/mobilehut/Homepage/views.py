@@ -13,7 +13,7 @@ from datetime import datetime,timedelta,date
 import random
 from django.db.models import Q
 from rest_framework.permissions import IsAuthenticatedOrReadOnly,BasePermission, SAFE_METHODS
-
+from django.db.models import Prefetch
 class CreateCarousel(generics.ListCreateAPIView):
     parser_classes = (MultiPartParser, FormParser)
     permission_classes=[IsAuthenticatedOrReadOnly]
@@ -191,22 +191,46 @@ class GetHomeData(APIView):
             pass
         else:
             prod=ProductSale.objects.filter(sale=sale.id).select_related('product')
+            temp_prod=prod
+            pro_list=[]
+
+            for temp_prod in temp_prod:
+                pro_list.append(temp_prod.product_id)
+            
+            
+            pc=Colour.objects.filter(colour_product__in=pro_list).values()
+            pm=ProductModel.objects.filter(model_product__in=pro_list).values()
+            pr=ProductReviews.objects.filter(product__in=pro_list).values()
+            
+            review_product_info=[]
+            model_product=[]
+            colour_product=[]
+
             for prod in prod:
-                for x in range (0,len(sale_product)): # check duplicate
-                        if prod.product.id==sale_product[x]['product_id']:
-                            save_val=False
-                            break
-                if save_val:
-                    pr=ProductReviews.objects.filter(product=prod.product_id).values()
-                    pm=ProductModel.objects.filter(model_product=prod.product_id).values()
-                    pc=Colour.objects.filter(colour_product=prod.product_id).values()
-                    review_product=CalculateRating(pr)
-                    images=prod.product.productimages_set.all().order_by('id')[:2].values()
-                    sale_product.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"stock":prod.product.product_quantity,"product_price":prod.product.product_price,
-                    "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
-                    "saleprice_enddate":prod.product.saleprice_enddate,"product_category":prod.product.category_name,"product_reviews":review_product,"review_count":len(pr),
-                    "product_images":images,'product_colour':pc,'product_model':pm})
-                save_val=True
+                for x in range (0,len(pc)):
+                    if (prod.product_id==pc[x]['colour_product_id']):
+                        colour_product.append(pc[x])
+                        
+                for x in range (0,len(pm)):
+                    if (prod.product_id==pm[x]['model_product_id']):
+                        model_product.append(pm[x])
+                        
+                for x in range (0,len(pr)):
+                    if (prod.product_id==pr[x]['product_id']):
+                        review_product_info.append(pr[x])
+                 
+                
+                review_product=CalculateRating(review_product_info)
+                images=prod.product.productimages_set.all().order_by('id')[:2].values()
+                sale_product.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"stock":prod.product.product_quantity,"product_price":prod.product.product_price,
+                "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
+                "saleprice_enddate":prod.product.saleprice_enddate,"product_category":prod.product.category_name,"product_reviews":review_product,"review_count":len(review_product_info),
+                "product_images":images,'product_colour':colour_product,'product_model':model_product})
+            
+                review_product_info=[]
+                model_product=[]
+                colour_product=[]
+                
             homepagedata['sale']={
                     "startdate":sale.startdate,
                     "enddate":sale.enddate,
@@ -222,47 +246,78 @@ class GetHomeData(APIView):
         # }
         # homepagedata['three_banner']=three_banner['banner']
         
-        prod=Product.objects.all().order_by('review_count')[:8]
+        prod=Product.objects.all().prefetch_related('colour_set','productimages_set','productmodel_set').order_by('review_count')         
+        new_arrival_prod=prod
         trend_products=[]
+
         for prod in prod:
-            pr=ProductReviews.objects.filter(product=prod.id).values()
-            pm=ProductModel.objects.filter(model_product=prod.id).values()
-            pc=Colour.objects.filter(colour_product=prod.id).values()
-            review_product=CalculateRating(pr)
             images=prod.productimages_set.all().order_by('id')[:2].values()
+            colour_product=prod.colour_set.values()
+            model_product=prod.productmodel_set.values()
             trend_products.append({"product_id":prod.id,"product_name":prod.product_name,"stock":prod.product_quantity,"product_category":prod.category_name,"product_price":prod.product_price,
                 "sale_price":prod.sale_price,"saleprice_startdate":prod.saleprice_startdate,
-                "saleprice_enddate":prod.saleprice_enddate,"product_reviews":review_product,"review_count":len(pr),"product_images":images,'product_colour':pc,'product_model':pm})
-       
+                "saleprice_enddate":prod.saleprice_enddate,"product_reviews":[],"review_count":[],"product_images":images,'product_colour':colour_product,'product_model':model_product})
+            
+            
+        
         homepagedata['trending_products']=trend_products
 
         prod=RecommendedProduct.objects.all()[:8].select_related('product')
+        temp_prod=prod
+        pro_list=[]
+
+        for temp_prod in temp_prod:
+            pro_list.append(temp_prod.product_id)
+            
+            
+        pc=Colour.objects.filter(colour_product__in=pro_list).values()
+        pm=ProductModel.objects.filter(model_product__in=pro_list).values()
+        pr=ProductReviews.objects.filter(product__in=pro_list).values()
+            
+        review_product_info=[]
+        model_product=[]
+        colour_product=[]
         recommended=[]
+
         for prod in prod:
-            pr=ProductReviews.objects.filter(product=prod.product.id).values()
-            pm=ProductModel.objects.filter(model_product=prod.product.id).values()
-            pc=Colour.objects.filter(colour_product=prod.product.id).values()
-            review_product=CalculateRating(pr)
+
+            for x in range (0,len(pc)):
+                    if (prod.product_id==pc[x]['colour_product_id']):
+                        colour_product.append(pc[x])
+                        
+            for x in range (0,len(pm)):
+                    if (prod.product_id==pm[x]['model_product_id']):
+                        model_product.append(pm[x])
+                        
+            for x in range (0,len(pr)):
+                    if (prod.product_id==pr[x]['product_id']):
+                        review_product_info.append(pr[x])
+                        
+            review_product=CalculateRating(review_product_info)
             images=prod.product.productimages_set.all().order_by('id')[:2].values()
             recommended.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"stock":prod.product.product_quantity,"product_category":prod.product.category_name,"product_price":prod.product.product_price,
                 "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
-                "saleprice_enddate":prod.product.saleprice_enddate,"product_reviews":review_product,"review_count":len(pr),"product_images":images,"product_colour":pc,"product_model":pm})
+                "saleprice_enddate":prod.product.saleprice_enddate,"product_reviews":review_product,"review_count":len(review_product_info),"product_images":images,"product_colour":colour_product,"product_model":model_product})
+            review_product_info=[]
+            model_product=[]
+            colour_product=[]
+
         homepagedata['recommended_product']=recommended
 
         
-        prod=Product.objects.all().prefetch_related('productimages_set')
+        #prod=Product.objects.all().prefetch_related('colour_set','productimages_set','productmodel_set','productimages_set')
+        
         new_arrival_product=[]
-        for prod in prod:
-            pr=ProductReviews.objects.filter(product=prod.id).values()
-            pm=ProductModel.objects.filter(model_product=prod.id).values()
-            pc=Colour.objects.filter(colour_product=prod.id).values()
-            review_product=CalculateRating(pr)
-            images=prod.productimages_set.all().order_by('id')[:2].values()
-            new_arrival_product.append({"product_id":prod.id,"product_name":prod.product_name,"stock":prod.product_quantity,"product_category":prod.category_name,"product_price":prod.product_price,
-                "sale_price":prod.sale_price,"saleprice_startdate":prod.saleprice_startdate,"created_date":prod.created_date,
-                "saleprice_enddate":prod.saleprice_enddate,"product_reviews":review_product,"review_count":len(pr),"product_images":images,"product_colour":pc,"product_model":pm})
+        
+        for new_arrival_prod in new_arrival_prod:
+            images=new_arrival_prod.productimages_set.all().order_by('id')[:2].values()
+            colour_product=new_arrival_prod.colour_set.values()
+            model_product=new_arrival_prod.productmodel_set.values()
+            new_arrival_product.append({"product_id":new_arrival_prod.id,"product_name":new_arrival_prod.product_name,"stock":new_arrival_prod.product_quantity,"product_category":new_arrival_prod.category_name,"product_price":new_arrival_prod.product_price,
+                "sale_price":new_arrival_prod.sale_price,"saleprice_startdate":new_arrival_prod.saleprice_startdate,"created_date":new_arrival_prod.created_date,
+                "saleprice_enddate":new_arrival_prod.saleprice_enddate,"product_reviews":[],"review_count":[],"product_images":images,"product_colour":colour_product,"product_model":model_product})
             
-       
+
         select_new_arrival=[]
         
         for  x in range(0,len(new_arrival_product)):
@@ -282,6 +337,7 @@ class GetHomeData(APIView):
         # trend_image=TrendingProductImage.objects.all().values()
         # homepage['trending_image']=trend_image
         
+        homepagedata['total_queries']=len(connection.queries)
         
 
         return Response(homepagedata,status=status.HTTP_200_OK)

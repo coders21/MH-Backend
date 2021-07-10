@@ -10,6 +10,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from datetime import datetime
+from django.db import connection, reset_queries
 #from rest_framework.authentication import SessionAuthentication, BasicAuthentication,TokenAuthentication
 #### CATEGORY VIEWS ####
 
@@ -489,6 +490,9 @@ class SiteReview(APIView): #user
     
     def post(self,request):
         payload=request.data
+        print(payload)
+        product=Product.objects.get(product_name=payload['product'])
+        payload[product]=product.id
         serializer=ProductReviewSerializer(data=payload)
 
         if serializer.is_valid():
@@ -593,9 +597,11 @@ class ProductList(APIView):
             show_data=getrecommendedProducts()
         elif (select_type=="search"):
             show_data=getSearchProducts(request.data['id'])
+        
+        show_data['queries']=len(connection.queries)
         return Response(show_data,status=status.HTTP_200_OK)
 
-
+       
 
 def CalculateRating(pr):
 

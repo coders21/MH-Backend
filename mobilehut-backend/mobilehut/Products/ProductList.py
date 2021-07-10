@@ -40,13 +40,13 @@ def getclearanceProducts():
 
 def gettrendingProducts():
 
-     prod=Product.objects.all().order_by('review_count')
+     prod=Product.objects.select_related('product_category','product_brand').all().order_by('review_count')
      product_data=productformat(prod)
      return product_data
 
 
 def getrecommendedProducts():
-    prod=RecommendedProduct.objects.all().select_related('product')
+    prod=RecommendedProduct.objects.all().select_related('product','product__product_category','product__product_brand')
     product_data=productformatSecond(prod)
 
     return product_data
@@ -87,7 +87,7 @@ def getsaleProducts():
      except (KeyError, Sale.DoesNotExist):
             pass
      else:
-            prod=ProductSale.objects.filter(sale=sale.id).select_related('product')
+            prod=ProductSale.objects.filter(sale=sale.id).select_related('product','product__product_category','product__product_brand')
             product_data=productformatSecond(prod)
 
      return product_data
@@ -103,7 +103,7 @@ def getSearchProducts(text):
     # for words in words:
     #       q_filters |= Q(search=SearchQuery(words))
           
-    prod=Product.objects.annotate(search=SearchVector('product_name','product_sku'),).filter(search=SearchQuery(text))
+    prod=Product.objects.select_related('product_category','product_brand').annotate(search=SearchVector('product_name','product_sku'),).filter(search=SearchQuery(text))
          
     # vector=SearchVector('product_name') + \
     # SearchVector('product_sku')
@@ -130,24 +130,33 @@ def productformatSecond(prod):
             category={}
             sale_product=[]
 
-            for prod in prod:
-                for x in range (0,len(sale_product)): # check duplicate
-                        if prod.product.id==sale_product[x]['product_id']:
-                            save_val=False
-                            break
-                if save_val:
-                    pr=None
-                    product_reviews=0
-                    pr=ProductReviews.objects.filter(product=prod.product.id).values()
-                    product_reviews=CalculateRating(pr)
-                    images=prod.product.productimages_set.all().order_by('id')[:2].values()
-                    sale_product.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"stock":prod.product.product_quantity,"product_price":prod.product.product_price,
-                    "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
-                    "saleprice_enddate":prod.product.saleprice_enddate,"product_category":prod.product.category_name,"product_reviews":product_reviews,"review_count":len(pr),
-                    "product_images":images})
-                    product_data['product']=sale_product
-                save_val=True
+            temp_prod=prod
+            pro_list=[]
 
+            for temp_prod in temp_prod:
+                pro_list.append(temp_prod.product.id)
+            
+            pr=ProductReviews.objects.filter(product__in=pro_list).values()
+            review_product_info=[]
+
+            for prod in prod:
+
+                for x in range (0,len(pr)):
+                    if (prod.product.id==pr[x]['product_id']):
+                        review_product_info.append(pr[x])
+
+            
+                product_reviews=CalculateRating(review_product_info)
+                images=prod.product.productimages_set.all().order_by('id')[:2].values()
+                sale_product.append({"product_id":prod.product.id,"product_name":prod.product.product_name,"stock":prod.product.product_quantity,"product_price":prod.product.product_price,
+                "sale_price":prod.product.sale_price,"saleprice_startdate":prod.product.saleprice_startdate,
+                "saleprice_enddate":prod.product.saleprice_enddate,"product_category":prod.product.category_name,"product_reviews":product_reviews,"review_count":len(review_product_info),
+                "product_images":images})
+                product_data['product']=sale_product
+                review_product_info=[]
+                review_product_info=[]
+
+                save_val=True
                 for x in range (0,len(category_append)): # check duplicate category
                         if prod.product.product_category.id==category_append[x]['id']:
                             save_val=False
@@ -194,17 +203,29 @@ def productformat(prod): # format to show data of products list
     
     save_val=True
 
+    temp_prod=prod
+    pro_list=[]
+
+    for temp_prod in temp_prod:
+        pro_list.append(temp_prod.id)
+            
+    pr=ProductReviews.objects.filter(product__in=pro_list).values()
+    review_product_info=[]
+
     for prod in prod:
-                product_reviews=0
-                pr=None
+
+                for x in range (0,len(pr)):
+                    if (prod.id==pr[x]['product_id']):
+                        review_product_info.append(pr[x])
+
                 images=prod.productimages_set.all().order_by('id')[:2].values()
-                pr=ProductReviews.objects.filter(product=prod.id).values()
-                product_reviews=CalculateRating(pr)
+                product_reviews=CalculateRating(review_product_info)
                 show_product.append({"product_id":prod.id,"product_name":prod.product_name,"stock":prod.product_quantity,"product_price":prod.product_price,
                 "sale_price":prod.sale_price,"created_date":prod.created_date,"saleprice_startdate":prod.saleprice_startdate,
-                "saleprice_enddate":prod.saleprice_enddate,"product_brand":prod.product_brand.brand_name,"product_category":prod.category_name,"product_reviews":product_reviews,"review_count":len(pr),
+                "saleprice_enddate":prod.saleprice_enddate,"product_brand":prod.product_brand.brand_name,"product_category":prod.category_name,"product_reviews":product_reviews,"review_count":len(review_product_info),
                 "product_images":images})
 
+                review_product_info=[]
                 # remove duplicate categories
                 for x in range (0,len(category_append)): # check duplicate
                         if prod.product_category.id==category_append[x]['id']:
